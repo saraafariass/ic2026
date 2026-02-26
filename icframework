@@ -1,0 +1,58 @@
+IC 
+
+- Coletar e organizar dados históricos de ingressantes, concluintes, docentes e bolsistas por gênero nos cursos de Computação do IF Goiano – Campus Ceres;
+
+- Desenvolver dashboards interativos que possibilitem a visualização e exploração dos dados no período de 2016 a 2026;
+
+- Documentar a metodologia e disponibilizar dados para acesso público, promovendo o uso de dados abertos;
+
+- Valorizar e registrar a trajetória do projeto Meninas Digitais no Cerrado.
+
+--------------------------------------------------------------------------------
+
+Base de dados
+
+-  SUAP, Repositório Institucional, Rede Integra, Google Scholar e Plataforma Nilo Peçanha;
+
+------------------------------------------------------------------------------
+Ferramentas 
+ 
+- Construção dos dashboards interativos: utilizando Power BI, Google Data Studio ou ferramentas equivalentes;
+
+----------------------------------------------------------------------------------
+Como fazer?
+
+- Utilização de Python (Pandas) para o tratamento e mineração dos dados históricos (2016–2026) provenientes do SUAP e da Plataforma Nilo Peçanha
+
+- Desenvolvimento do dashboard via Streamlit, framework que transforma os scripts de análise em painéis interativos de forma ágil e acadêmica
+
+https://www.alura.com.br/artigos/streamlit-compartilhando-sua-aplicacao-de-dados-sem-dor-de-cabeca?srsltid=AfmBOoqSPing9pGJqGXJLVi4g9I4UCvyo1gXorRRsfCSbCRKXxbiFWlR
+
+
+- Incorporação direta no site do projeto (HTML/CSS) via IFrame
+
+
+-------------------------------------------------------------------------
+Campos para o dashboard
+
+- Aba Estudantes: 
+    Ingressantes vs. Concluintes,  
+    Taxa de Permanência, 
+
+    Distribuição por Curso,
+    Verticalização.
+
+- Aba Pessoas: 
+    Corpo Docente 
+    Histórico de Bolsistas (segmentar pelo tripé).
+
+- Aba Produção e Ações: 
+    Eventos, Oficinas, 
+    Produção Científica (Nuvem de Palavras) 
+    Projetos (Ensino/Pesquisa/Extensão).
+
+
+
+streamlit run app.py
+source venv/bin/activate
+
