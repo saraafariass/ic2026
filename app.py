@@ -54,7 +54,7 @@ total_mulheres = df_filtered[df_filtered['Categoria'] == 'Estudantes']['Quantida
 st.metric(label="Total de Estudantes Mulheres no Período", value=int(total_mulheres))
 
 # Divisão por ABAS (Conforme os Objetivos do Projeto)
-tab_est, tab_pes, tab_prod = st.tabs(["🎓 Estudantes", "👩‍🏫 Pessoas", "🚀 Produção e Ações"])
+tab_est, tab_pes, tab_prod = st.tabs(["Estudantes", "👩‍🏫 Pessoas", "🚀 Produção e Ações"])
 
 # --- ABA 1: ESTUDANTES ---
 with tab_est:
