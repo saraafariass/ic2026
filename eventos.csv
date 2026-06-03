@@ -1,11 +1,1 @@
-ano,quantidade,descricao
-2016,2,Oficina de Scratch
-2017,5,Workshop de Python
-2018,4,Congresso de TI
-2019,2,Congresso de TI
-2020,4,Flisol
-2021,2,Oficina de Scratch
-2022,4,WTM
-2023,4,WTM
-2024,4,Oficina de Scratch
-2025,4,Oficina de Scratch
+ano,nome,quantidade

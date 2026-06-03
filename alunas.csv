@@ -1,21 +1,32 @@
-ano_ingresso,ano_conclusao,curso,status,forma_ingresso,participou_projeto,verticalizou,bolsista
-2016,2018,Técnico em Informática (Integrado),Formada,Exame de Seleção,True,False,False
-2016,2019,Bacharelado em Sistemas de Informação,Formada,ENEM/SiSU,True,False,True
-2017,2019,Técnico em Informática (Integrado),Formada,Exame de Seleção,False,False,False
-2017,2021,Bacharelado em Sistemas de Informação,Formada,ENEM/SiSU,True,True,True
-2018,2020,Técnico em Informática (Integrado),Formada,Exame de Seleção,True,False,True
-2018,2022,Bacharelado em Sistemas de Informação,Formada,ENEM/SiSU,False,False,False
-2019,2021,Técnico em Informática (Integrado),Formada,Exame de Seleção,True,False,False
-2019,,Bacharelado em Sistemas de Informação,Evadida,ENEM/SiSU,False,False,False
-2020,2022,Técnico em Informática (Subsequente),Formada,Processo Seletivo,True,False,True
-2020,,Bacharelado em Sistemas de Informação,Ativa,ENEM/SiSU,True,False,False
-2021,2023,Técnico em Informática (Integrado),Formada,Exame de Seleção,True,False,True
-2021,,Licenciatura em Informática (Antigo),Evadida,Vestibular,False,False,False
-2022,,Técnico em Informática para Internet (Integrado),Ativa,Exame de Seleção,True,False,False
-2022,,Bacharelado em Sistemas de Informação,Ativa,ENEM/SiSU,True,False,False
-2023,,Técnico em Informática (Integrado),Ativa,Exame de Seleção,False,False,False
-2023,,Bacharelado em Sistemas de Informação,Ativa,ENEM/SiSU,True,False,False
-2024,,Técnico em Informática (Integrado),Ativa,Exame de Seleção,True,False,False
-2024,,Bacharelado em Sistemas de Informação,Ativa,ENEM/SiSU,True,False,False
-2025,,Técnico em Informática para Internet (Integrado),Ativa,Exame de Seleção,False,False,False
-2025,,Bacharelado em Sistemas de Informação,Ativa,ENEM/SiSU,True,False,False
+nome,curso,periodo,verticalizou,bolsista
+Alanna Leticia Pessoa de Carvalho,Técnico,2025 - atual,Não,Sim
+Ana Carolina Xavier de Oliveira,Técnico,2025 - atual,Não,Sim
+Anna Clara Silva Ribeiro,Técnico,2017 - 2019,Sim,Sim
+Anna Julia Rodrigues dos Santos,Técnico,2020,Não,Sim
+Égilly de Andrade Morais,Técnico,2023 - 2024,Não,Sim
+Gabriella Marina Ribeiro Nunes Silva,Técnico,2017 - 2018,Sim,Sim
+Gabryella da Silva Garcia,Técnico,2021 - 2022,Sim,Sim
+Giovanna Fagundes Silva,Técnico,2019 - 2020,Sim,Sim
+Grazielly Kathleen Oliveira Souza,Técnico,2023 - 2024,Não,Sim
+Hávila Caroliny Rezende de Oliveira,Técnico,2022,Não,Sim
+Ianka Talita Bastos de Assis,Graduação,2016 - 2020,,Sim
+Iasminny Victória Mendes Araujo,Técnico,2024,Não,Sim
+Janiele de Farias Machado,Graduação,2024 - atual,,Sim
+Kamylla Ribeiro de Castro,Técnico,2016 - 2017,Sim,Sim
+Láyza Ferreira Lopes,Graduação,2021 - 2022,,Sim
+Letícia dos Santos da Silva,Graduação,2021,,Sim
+Letícia Santos Camargo,Técnico e Graduação,2017 - 2024,Sim,Sim
+Manoela Amaral Duarte,Graduação,2025 - atual,,Sim
+Mara Gonçalves Silva,Técnico,2017 - 2018,Sim,Sim
+Maria Alice Nunes Silva,Graduação,2020 - 2021,,Sim
+Maria Clara de Sousa Rosa,Técnico,2025 - atual,Não,Sim
+Maria Eduarda da Silva Carrijo,Técnico,2025 - atual,Não,Sim
+Maria Isabela da Silva Nunes,Técnico,2019 - 2022,Sim,Sim
+Maria Luiza do Carmo Araújo Favorito,Técnico,2025,Não,Sim
+Maria Luiza Fernandes Silva,Graduação,2022 - 2025,,Sim
+Nathally Pereira de Souza,Técnico,2022 - 2023,Não,Sim
+Rayane Ferreira da Silva Cesário,Técnico,2021,Não,Sim
+Sarah Gabriela Rodrigues Almeida,Técnico,2025 - atual,Não,Sim
+Sara Luiz de Farias,Técnico e Graduação,2020 - atual,Sim,Sim
+Thalia Santos de Santana,Graduação,2016 - 2020,,Sim
+Vitória Ferreira Leal,Técnico,2022,Não,Sim
