@@ -1,4 +1,4 @@
-# Dashboard MDC — Meninas Digitais no Cerrado
+# Dashboard Meninas Digitais no Cerrado
 
 Dashboard interativo com a sistematização de 10 anos de dados abertos sobre gênero na Computação no Campus Ceres, desenvolvido no âmbito do projeto **Meninas Digitais no Cerrado**.
 
@@ -14,12 +14,12 @@ Este projeto integra o edital institucional **Nº 11 de 03 de abril de 2025 (PIB
 
 O dashboard reúne e visualiza dados sobre:
 
-- **Estudantes** — participação de alunas no Ensino Médio Técnico e na Graduação
-- **Docentes** — corpo docente envolvido no projeto
-- **Projetos** — iniciativas de ensino, pesquisa e extensão
-- **Publicações** — produção científica ao longo dos anos
-- **Eventos e Premiações** — participações e reconhecimentos
-- **Parcerias** — articulação com a Rede Nacional RENACEE_MD
+- **Estudantes**: participação de alunas no Ensino Médio Técnico e na Graduação
+- **Docentes**: corpo docente envolvido no projeto
+- **Projetos**: iniciativas de ensino, pesquisa e extensão
+- **Publicações**: produção científica ao longo dos anos
+- **Eventos e Premiações**: participações e reconhecimentos
+- **Parcerias**: articulação com a Rede Nacional RENACEE_MD
 
 ## Equipe
 
@@ -28,14 +28,14 @@ O dashboard reúne e visualiza dados sobre:
 | Bolsista PIBIC | Sara Luiz de Farias |
 | Coordenadora | Profa. Thalia Santos de Santana |
 
-**Instituição:** IF Goiano — Campus Ceres
+**Instituição:** IF Goiano - Campus Ceres
 
 ## Tecnologias utilizadas
 
 - [Python](https://www.python.org/)
-- [Streamlit](https://streamlit.io/) — interface web interativa
-- [Pandas](https://pandas.pydata.org/) — manipulação de dados
-- [Plotly](https://plotly.com/python/) — gráficos interativos
+- [Streamlit](https://streamlit.io/) - interface web interativa
+- [Pandas](https://pandas.pydata.org/) - manipulação de dados
+- [Plotly](https://plotly.com/python/) - gráficos interativos
 
 ## Estrutura do repositório
 
@@ -88,4 +88,4 @@ https://meninasdigitaisnocerrado.com.br. Acesso em: dia mês ano.
 
 ---
 
-Feito com 🤍 por Sara Farias — Meninas Digitais no Cerrado
+Feito com 🤍 por Sara Farias - Meninas Digitais no Cerrado
