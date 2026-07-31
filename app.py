@@ -244,10 +244,6 @@ filtro_curso = st.sidebar.selectbox("Curso:", cursos_options)
 filtro_verticalizou = st.sidebar.selectbox("Verticalizou:", ["Todas", "Sim", "Não"])
 filtro_bolsista = st.sidebar.selectbox("Bolsista:", ["Todas", "Sim", "Não"])
 
-if st.sidebar.button("Atualizar dados do site"):
-    st.cache_data.clear()
-    st.rerun()
-
 projetos_periodo = filtrar_periodo(projetos, ano_ini, ano_fim)
 publicacoes_periodo = publicacoes[publicacoes["ano"].between(ano_ini, ano_fim)]
 premiacoes_periodo = premiacoes[premiacoes["ano"].between(ano_ini, ano_fim)]
