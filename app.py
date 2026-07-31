@@ -1,12 +1,11 @@
 import streamlit as st
 import pandas as pd
-from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import plotly.express as px
 
 from assets.styles import (
     get_css, COR_VERMELHO, COR_VERMELHO_GRAFICO,
-    TEXTO, TEXTO_SECUNDARIO, TEXTO_TERCIARIO, FUNDO, CARD, TIPO_COR
+    TEXTO, TEXTO_SECUNDARIO, TEXTO_TERCIARIO, FUNDO, CARD, TIPO_COR, EVENTO_TIPO_COR
 )
 
 st.set_page_config(layout="wide", page_title="  Dashboard MDC")
@@ -98,8 +97,87 @@ def _nome_base(nome):
     return nome.lower()
 
 
+def _nome_busca(nome):
+    """Extrai apenas nome e primeiro sobrenome para busca flexível."""
+    import re
+    nome = re.sub(r'^Prof[ao]?\.\s*', '', nome.strip())
+    nome = re.sub(r'\s*\(.*?\)', '', nome).strip()
+    # Pega apenas nome e primeiro sobrenome (ex: 'Maria Isabela' de 'Maria Isabela da Silva Nunes')
+    partes = nome.split()
+    if len(partes) >= 2:
+        return (partes[0] + ' ' + partes[1]).lower()
+    return nome.lower()
+
+
+def verificar_e_separar_resultados(nome, projetos_df, publicacoes_df, alunas_df, docentes_df, ano_ini, ano_fim):
+    """Verifica se a pessoa é aluna e separa projetos/publicações por papel."""
+    import re
+    busca = _nome_busca(nome)
+    
+    # Verificar se é aluna (no período do projeto)
+    eh_aluna = False
+    periodo_aluna_fim = 0
+    for _, aluna in alunas_df.iterrows():
+        if busca in str(aluna['nome']).lower():
+            # Verificar se o período da aluna se sobrepõe ao período do filtro
+            periodo = str(aluna.get('periodo', ''))
+            anos = re.findall(r'\d{4}', periodo)
+            if anos:
+                periodo_ini = int(anos[0])
+                if 'atual' in periodo.lower():
+                    periodo_fim = 2026
+                else:
+                    periodo_fim = int(anos[-1]) if len(anos) > 1 else periodo_ini
+                
+                # Se o período da aluna se sobrepõe ao filtro, é aluna
+                if periodo_fim >= ano_ini and periodo_ini <= ano_fim:
+                    eh_aluna = True
+                    periodo_aluna_fim = periodo_fim
+                    break
+    
+    # Verificar se é docente
+    eh_docente = False
+    for _, docente in docentes_df.iterrows():
+        if busca in str(docente['nome']).lower():
+            eh_docente = True
+            break
+    
+    # Buscar projetos e publicações
+    projetos = encontrar_projetos_por_pessoa(nome, projetos_df)
+    publicacoes = encontrar_publicacoes_por_pessoa(nome, publicacoes_df)
+    
+    # Separar por papel
+    if eh_aluna and eh_docente:
+        # Se é aluna E docente, separar projetos/publicações
+        # Projetos/publicações até o ano de término da aluna vão para "como aluna"
+        # O resto vai para "como professora"
+        proj_aluna = []
+        proj_docente = []
+        for p in projetos:
+            ano_proj = p.get('ano', p.get('ano_ini', 0))
+            if ano_proj <= periodo_aluna_fim:
+                proj_aluna.append(p)
+            else:
+                proj_docente.append(p)
+        
+        pub_aluna = []
+        pub_docente = []
+        for p in publicacoes:
+            ano_pub = p.get('ano', 0)
+            if ano_pub <= periodo_aluna_fim:
+                pub_aluna.append(p)
+            else:
+                pub_docente.append(p)
+        
+        return proj_aluna, proj_docente, pub_aluna, pub_docente, True
+    elif eh_aluna:
+        return projetos, [], publicacoes, [], True
+    else:
+        return [], projetos, [], publicacoes, False
+
+
 def encontrar_projetos_por_pessoa(nome, projetos_df):
-    busca = _nome_base(nome)
+    busca = _nome_busca(nome)
     return [
         p for _, p in projetos_df.iterrows()
         if busca in str(p.get('equipe', p.get('autores', ''))).lower()
@@ -107,7 +185,7 @@ def encontrar_projetos_por_pessoa(nome, projetos_df):
 
 
 def encontrar_publicacoes_por_pessoa(nome, publicacoes_df):
-    busca = _nome_base(nome)
+    busca = _nome_busca(nome)
     return [
         p for _, p in publicacoes_df.iterrows()
         if busca in str(p.get('autores', '')).lower()
@@ -125,22 +203,6 @@ def carregar_dados():
     return alunas, docentes, projetos, publicacoes, premiacoes, eventos
 
 
-def criar_nuvem_palavras(projetos_df):
-    textos = []
-    for _, projeto in projetos_df.iterrows():
-        texto = f"{projeto['nome']} {projeto.get('detalhes', '')}"
-        textos.append(texto)
-    if not textos:
-        return None
-    texto_completo = " ".join(textos)
-    nuvem = WordCloud(
-        width=800, height=400, background_color='white',
-        colormap='Reds', max_words=50, collocations=False
-    ).generate(texto_completo)
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.imshow(nuvem, interpolation='bilinear')
-    ax.axis('off')
-    return fig
 
 
 def iniciais(nome):
@@ -176,7 +238,7 @@ ano_ini, ano_fim = st.sidebar.slider(
 
 st.sidebar.markdown('<p class="filtro-titulo">Filtrar estudantes</p>', unsafe_allow_html=True)
 
-cursos_options = ["Todas", "Técnico", "Graduação", "Técnico e Graduação"]
+cursos_options = ["Todos", "Técnico", "Graduação", "Técnico e Graduação"]
 filtro_curso = st.sidebar.selectbox("Curso:", cursos_options)
 
 filtro_verticalizou = st.sidebar.selectbox("Verticalizou:", ["Todas", "Sim", "Não"])
@@ -272,8 +334,9 @@ with tab_est:
         )
     else:
         for _, aluna in alunas_filtradas.iterrows():
-            projetos_aluna = encontrar_projetos_por_pessoa(aluna["nome"], projetos_periodo)
-            publicacoes_aluna = encontrar_publicacoes_por_pessoa(aluna["nome"], publicacoes_periodo)
+            proj_aluna, proj_docente, pub_aluna, pub_docente, eh_aluna = verificar_e_separar_resultados(
+                aluna["nome"], projetos_periodo, publicacoes_periodo, alunas, docentes, ano_ini, ano_fim
+            )
 
             vert_val = aluna["verticalizou"]
             vert_display = "Não se aplica" if pd.isna(vert_val) or str(vert_val).strip() == "" else vert_val
@@ -285,6 +348,11 @@ with tab_est:
                 badges_html += ' <span class="badge badge-vert">Verticalizou</span>'
 
             label = f"{aluna['nome']} - {aluna['curso']}: {aluna['periodo']}"
+            
+            # Verificar se é a Thalia para mostrar separação por papel
+            nome_base = _nome_base(aluna['nome'])
+            is_thalia = 'thalia' in nome_base
+            
             with st.expander(label):
                 st.markdown(f'<div style="margin-bottom:0.5rem;">{badges_html}</div>', unsafe_allow_html=True)
 
@@ -299,36 +367,102 @@ with tab_est:
                     """, unsafe_allow_html=True)
 
                 with proj_col:
-                    st.markdown(f'<div class="det-label">Projetos ({len(projetos_aluna)})</div>', unsafe_allow_html=True)
-                    if projetos_aluna:
-                        for p in projetos_aluna:
-                            tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
-                            st.markdown(f"""
-                            <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
-                                margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
-                                <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
-                                <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
-                                <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
-                            </div>
-                            """, unsafe_allow_html=True)
+                    if is_thalia:
+                        # Mostrar separação apenas para a Thalia
+                        if proj_aluna or proj_docente:
+                            if proj_aluna:
+                                st.markdown(f'<div class="det-label" style="color:{COR_VERMELHO};">Como aluna ({len(proj_aluna)})</div>', unsafe_allow_html=True)
+                                for p in proj_aluna:
+                                    tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                    st.markdown(f"""
+                                    <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
+                                        margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
+                                        <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
+                                        <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
+                                        <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+                            
+                            if proj_docente:
+                                st.markdown("---")
+                                st.markdown(f'<div class="det-label">Como professora ({len(proj_docente)})</div>', unsafe_allow_html=True)
+                                for p in proj_docente:
+                                    tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                    st.markdown(f"""
+                                    <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
+                                        margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
+                                        <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
+                                        <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
+                                        <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+                        else:
+                            st.caption("Nenhum projeto no período")
                     else:
-                        st.caption("Nenhum projeto no período")
+                        # Para outras alunas, mostrar apenas "Projetos"
+                        st.markdown(f'<div class="det-label">Projetos ({len(proj_aluna)})</div>', unsafe_allow_html=True)
+                        if proj_aluna:
+                            for p in proj_aluna:
+                                tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                st.markdown(f"""
+                                <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
+                                    margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
+                                    <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
+                                    <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
+                                    <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                </div>
+                                """, unsafe_allow_html=True)
+                        else:
+                            st.caption("Nenhum projeto no período")
 
                 with pub_col:
-                    st.markdown(f'<div class="det-label">Publicações ({len(publicacoes_aluna)})</div>', unsafe_allow_html=True)
-                    if publicacoes_aluna:
-                        for p in publicacoes_aluna:
-                            link = str(p.get('link', '')).strip()
-                            tem_link = pd.notna(p.get('link')) and link
-                            alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
-                            btn = (
-                                f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
-                                f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
-                                f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
-                            ) if tem_link else ''
-                            card_publicacao(p, alcance_cor, btn)
+                    if is_thalia:
+                        # Mostrar separação apenas para a Thalia
+                        if pub_aluna or pub_docente:
+                            if pub_aluna:
+                                st.markdown(f'<div class="det-label" style="color:{COR_VERMELHO};">Como aluna ({len(pub_aluna)})</div>', unsafe_allow_html=True)
+                                for p in pub_aluna:
+                                    link = str(p.get('link', '')).strip()
+                                    tem_link = pd.notna(p.get('link')) and link
+                                    alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
+                                    btn = (
+                                        f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
+                                        f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                        f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
+                                    ) if tem_link else ''
+                                    card_publicacao(p, alcance_cor, btn)
+                            
+                            if pub_docente:
+                                st.markdown("---")
+                                st.markdown(f'<div class="det-label">Como professora ({len(pub_docente)})</div>', unsafe_allow_html=True)
+                                for p in pub_docente:
+                                    link = str(p.get('link', '')).strip()
+                                    tem_link = pd.notna(p.get('link')) and link
+                                    alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
+                                    btn = (
+                                        f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
+                                        f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                        f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
+                                    ) if tem_link else ''
+                                    card_publicacao(p, alcance_cor, btn)
+                        else:
+                            st.caption("Nenhuma publicação no período")
                     else:
-                        st.caption("Nenhuma publicação no período")
+                        # Para outras alunas, mostrar apenas "Publicações"
+                        st.markdown(f'<div class="det-label">Publicações ({len(pub_aluna)})</div>', unsafe_allow_html=True)
+                        if pub_aluna:
+                            for p in pub_aluna:
+                                link = str(p.get('link', '')).strip()
+                                tem_link = pd.notna(p.get('link')) and link
+                                alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
+                                btn = (
+                                    f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
+                                    f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                    f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
+                                ) if tem_link else ''
+                                card_publicacao(p, alcance_cor, btn)
+                        else:
+                            st.caption("Nenhuma publicação no período")
 
 # aba docentes
 with tab_doc:
@@ -337,13 +471,18 @@ with tab_doc:
     st.markdown("---")
 
     for _, docente in docentes.iterrows():
-        proj_doc = encontrar_projetos_por_pessoa(docente["nome"], projetos_periodo)
-        pub_doc = encontrar_publicacoes_por_pessoa(docente["nome"], publicacoes_periodo)
+        proj_aluna, proj_docente, pub_aluna, pub_docente, eh_aluna = verificar_e_separar_resultados(
+            docente["nome"], projetos_periodo, publicacoes_periodo, alunas, docentes, ano_ini, ano_fim
+        )
 
         lattes_url = str(docente.get('lattes', '')).strip()
         email = docente.get('email', '')
 
         nome_exibido = _nome_base(docente["nome"]).title()
+        
+        # Verificar se é a Thalia para mostrar separação por papel
+        is_thalia = 'thalia' in nome_exibido.lower()
+        
         label = f"{docente['nome']}"
 
         with st.expander(label):
@@ -360,36 +499,102 @@ with tab_doc:
                 """, unsafe_allow_html=True)
 
             with proj_col:
-                st.markdown(f'<div class="det-label">Projetos ({len(proj_doc)})</div>', unsafe_allow_html=True)
-                if proj_doc:
-                    for p in proj_doc:
-                        tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
-                        st.markdown(f"""
-                        <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
-                            margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
-                            <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
-                            <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
-                            <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
-                        </div>
-                        """, unsafe_allow_html=True)
+                if is_thalia:
+                    # Mostrar separação apenas para a Thalia
+                    if proj_aluna or proj_docente:
+                        if proj_aluna:
+                            st.markdown(f'<div class="det-label" style="color:{COR_VERMELHO};">Como aluna ({len(proj_aluna)})</div>', unsafe_allow_html=True)
+                            for p in proj_aluna:
+                                tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                st.markdown(f"""
+                                <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
+                                    margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
+                                    <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
+                                    <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
+                                    <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                </div>
+                                """, unsafe_allow_html=True)
+                        
+                        if proj_docente:
+                            st.markdown("---")
+                            st.markdown(f'<div class="det-label">Como professora ({len(proj_docente)})</div>', unsafe_allow_html=True)
+                            for p in proj_docente:
+                                tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                st.markdown(f"""
+                                <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
+                                    margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
+                                    <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
+                                    <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
+                                    <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                </div>
+                                """, unsafe_allow_html=True)
+                    else:
+                        st.caption("Nenhum projeto no período")
                 else:
-                    st.caption("Nenhum projeto no período")
+                    # Para outros docentes, mostrar apenas "Projetos"
+                    st.markdown(f'<div class="det-label">Projetos ({len(proj_docente)})</div>', unsafe_allow_html=True)
+                    if proj_docente:
+                        for p in proj_docente:
+                            tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                            st.markdown(f"""
+                            <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
+                                margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
+                                <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
+                                <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
+                                <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                    else:
+                        st.caption("Nenhum projeto no período")
 
             with pub_col:
-                st.markdown(f'<div class="det-label">Publicações ({len(pub_doc)})</div>', unsafe_allow_html=True)
-                if pub_doc:
-                    for p in pub_doc:
-                        link = str(p.get('link', '')).strip()
-                        tem_link = pd.notna(p.get('link')) and link
-                        alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
-                        btn = (
-                            f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
-                            f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
-                            f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
-                        ) if tem_link else ''
-                        card_publicacao(p, alcance_cor, btn)
+                if is_thalia:
+                    # Mostrar separação apenas para a Thalia
+                    if pub_aluna or pub_docente:
+                        if pub_aluna:
+                            st.markdown(f'<div class="det-label" style="color:{COR_VERMELHO};">Como aluna ({len(pub_aluna)})</div>', unsafe_allow_html=True)
+                            for p in pub_aluna:
+                                link = str(p.get('link', '')).strip()
+                                tem_link = pd.notna(p.get('link')) and link
+                                alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
+                                btn = (
+                                    f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
+                                    f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                    f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
+                                ) if tem_link else ''
+                                card_publicacao(p, alcance_cor, btn)
+                        
+                        if pub_docente:
+                            st.markdown("---")
+                            st.markdown(f'<div class="det-label">Como professora ({len(pub_docente)})</div>', unsafe_allow_html=True)
+                            for p in pub_docente:
+                                link = str(p.get('link', '')).strip()
+                                tem_link = pd.notna(p.get('link')) and link
+                                alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
+                                btn = (
+                                    f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
+                                    f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                    f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
+                                ) if tem_link else ''
+                                card_publicacao(p, alcance_cor, btn)
+                    else:
+                        st.caption("Nenhuma publicação no período")
                 else:
-                    st.caption("Nenhuma publicação no período")
+                    # Para outros docentes, mostrar apenas "Publicações"
+                    st.markdown(f'<div class="det-label">Publicações ({len(pub_docente)})</div>', unsafe_allow_html=True)
+                    if pub_docente:
+                        for p in pub_docente:
+                            link = str(p.get('link', '')).strip()
+                            tem_link = pd.notna(p.get('link')) and link
+                            alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
+                            btn = (
+                                f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
+                                f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
+                            ) if tem_link else ''
+                            card_publicacao(p, alcance_cor, btn)
+                    else:
+                        st.caption("Nenhuma publicação no período")
 
 # aba projetos
 with tab_projetos:
@@ -444,16 +649,7 @@ with tab_projetos:
     st.markdown("---")
     secao("Nuvem de palavras dos projetos")
 
-    fig_nuvem = criar_nuvem_palavras(projetos_periodo)
-    if fig_nuvem:
-        st.pyplot(fig_nuvem)
-    else:
-        st.info("Nenhum projeto no período para gerar nuvem de palavras.")
-
-    st.markdown(
-        f'<p class="fonte-site">Fonte: <a href="https://meninasdigitaisnocerrado.com.br/projetos" target="_blank">meninasdigitaisnocerrado.com.br/projetos</a></p>',
-        unsafe_allow_html=True,
-    )
+   
 
 # aba publicações
 with tab_pub:
@@ -512,12 +708,26 @@ with tab_pub:
         unsafe_allow_html=True,
     )
 
-# aba eventos e publicações
+# aba eventos e premiações
 with tab_eventos:
-    secao("Eventos participados")
+    secao("Eventos e Premiações")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Total de eventos", len(eventos_periodo))
+    with col2:
+        st.metric("Total de premiações", len(premiacoes_periodo))
 
     if not eventos_periodo.empty:
-        eventos_por_ano = eventos_periodo.groupby("ano")["quantidade"].sum().reset_index()
+        # Filtra eventos sem nome (linhas vazias)
+        eventos_periodo = eventos_periodo[eventos_periodo['nome'].notna() & (eventos_periodo['nome'].astype(str).str.strip() != '')]
+        if not eventos_periodo.empty:
+            # Preenche valores ausentes com padrões
+            eventos_periodo['tipo_atividade'] = eventos_periodo['tipo_atividade'].fillna('Evento').astype(str)
+            eventos_periodo['funcao'] = eventos_periodo['funcao'].fillna('Participante').astype(str)
+            eventos_periodo['link'] = eventos_periodo['link'].fillna('')
+
+        eventos_por_ano = eventos_periodo.groupby("ano").size().reset_index(name="quantidade")
 
         fig_eventos = px.bar(
             eventos_por_ano, x="ano", y="quantidade",
@@ -533,38 +743,62 @@ with tab_eventos:
         fig_eventos.update_traces(textposition='outside')
         st.plotly_chart(fig_eventos, use_container_width=True)
 
-        st.markdown("---")
-        secao("Eventos mais participados")
 
-        textos_eventos = []
-        for _, evento in eventos_periodo.iterrows():
-            nome_evento = evento['nome']
-            quantidade = int(evento['quantidade'])
-            textos_eventos.extend([nome_evento] * (quantidade // 5 + 1))
+    # Cards de eventos por tipo
+    st.markdown("---")
+    secao("Eventos por tipo")
 
-        if textos_eventos:
-            texto_completo = " ".join(textos_eventos)
-            nuvem_eventos = WordCloud(
-                width=800, height=400, background_color='white',
-                colormap='Reds', max_words=30, collocations=False
-            ).generate(texto_completo)
-            fig_nuvem_eventos, ax_nuvem = plt.subplots(figsize=(10, 5))
-            ax_nuvem.imshow(nuvem_eventos, interpolation='bilinear')
-            ax_nuvem.axis('off')
-            st.pyplot(fig_nuvem_eventos)
+    atividades = [
+        {"label": "Organização", "cor": "#673ab7", "funcao": "Organização"},
+        {"label": "Ouvinte", "cor": "#4caf50", "funcao": "Ouvinte"},
+        {"label": "Participante", "cor": "#2196f3", "funcao": "Participante"},
+    ]
 
-        st.markdown("---")
-        st.markdown("**Lista de eventos**")
-        eventos_lista = eventos_periodo.sort_values("ano", ascending=False)
-        for _, evento in eventos_lista.iterrows():
-            st.markdown(f"""
-            <div class="card-publicacao">
-                <strong>{evento['nome']}</strong><br>
-                <small>Ano: {int(evento['ano'])} | Participações: {int(evento['quantidade'])}</small>
-            </div>
-            """, unsafe_allow_html=True)
-    else:
-        st.info("Nenhum evento registrado no período.")
+    for atividade in atividades:
+        eventos_funcao = eventos_periodo[eventos_periodo['funcao'] == atividade['funcao']]
+        
+        if not eventos_funcao.empty:
+            eventos_funcao = eventos_funcao.sort_values('nome', ascending=True)
+            
+            label = f"{atividade['label']} ({len(eventos_funcao)})"
+            with st.expander(label):
+                for _, evento in eventos_funcao.iterrows():
+                    is_destaque = False 
+                    
+                    badges = []
+                    badge_map = {
+                        'Palestra': 'badge-palestra',
+                        'Publicação': 'badge-publicacao', 
+                        'Oficina': 'badge-oficina',
+                        'Evento': 'badge-evento',
+                        'Viagem técnica': 'badge-viagem'
+                    }
+                    tipo_badge = badge_map.get(evento['tipo_atividade'], 'badge-evento')
+                    badges.append(f'<span class="badge {tipo_badge}">{evento["tipo_atividade"]}</span>')
+                    
+                    badge_html = ' '.join(badges)
+                    
+                    local = str(evento.get('local', '')).strip()
+                    if local and pd.notna(evento.get('local')):
+                        badge_html = f'<span class="badge badge-local">{local}</span> ' + badge_html
+                    
+                    link = str(evento.get('link', '')).strip()
+                    btn = ''
+                    if link:
+                        btn = f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.5rem;padding:4px 12px;background:{COR_VERMELHO};color:#fff;border-radius:6px;font-size:0.7rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
+
+                    card_class = 'card-evento destaque' if is_destaque else 'card-evento'
+                    
+                    st.markdown(f"""
+                    <div class="{card_class}">
+                        <strong>{evento['nome']}</strong><br>
+                        <div>{badge_html}</div>
+                        <div style="text-align:right;font-size:0.75rem;color:{TEXTO_TERCIARIO};margin-top:0.5rem;">
+                            {int(evento['ano'])}
+                        </div>
+                        {btn}
+                    </div>
+                    """, unsafe_allow_html=True)
 
     st.markdown("---")
     secao("Premiações")
@@ -605,32 +839,18 @@ with tab_eventos:
 
 # aba parcerias
 with tab_parcerias:
-    secao("Instituições parceiras")
 
-    try:
-        parcerias = pd.read_csv("parcerias.csv")
-
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total de parcerias", len(parcerias))
-        with col2:
-            st.metric("Parcerias acadêmicas", len(parcerias[parcerias["tipo"] == "Acadêmica"]) if "tipo" in parcerias.columns else 0)
-        with col3:
-            st.metric("Parcerias institucionais", len(parcerias[parcerias["tipo"] == "Institucional"]) if "tipo" in parcerias.columns else 0)
-
-        st.markdown("---")
-
-        for _, parceria in parcerias.iterrows():
-            st.markdown(f"""
-            <div class="card-projeto">
-                <strong>{parceria['instituicao']}</strong><br>
-                Tipo: {parceria.get('tipo', 'Não informado')}<br>
-                Atividade: {parceria.get('atividade', 'Não informado')}<br>
-                Contato: {parceria.get('contato', 'Não informado')}
-            </div>
-            """, unsafe_allow_html=True)
-    except Exception:
-        st.info("Nenhuma parceria cadastrada no momento.")
+    st.markdown(f"""
+    <div style="background:{CARD};border-radius:10px;padding:1.5rem 2rem;
+        box-shadow:0 1px 3px rgba(0,0,0,0.07);line-height:1.8;color:{TEXTO};font-size:0.95rem;">
+        O projeto integra a <strong>Rede Nacional de Educação e Extensão Meninas Digitais (RENACEE_MD)</strong>,
+        iniciativa aprovada na chamada CNPq/MCTI/Mulheres nº 31/2023 e coordenada pela Profa. Luciana Cardoso de Castro Salgado (UFF).
+        Esta parceria nacional fortalece nossas ações com o objetivo de aumentar a participação feminina nas áreas STEM,
+        diminuir a evasão das estudantes nos cursos de Computação e estimular a igualdade de gênero.
+        <br><br>
+        <strong>Período:</strong> 2025 - 2027
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown(
         f'<p class="fonte-site">Para mais informações sobre parcerias, acesse o site oficial do projeto.</p>',
@@ -761,7 +981,6 @@ with tab_sobre:
         ("Streamlit", "Interface web interativa"),
         ("Pandas", "Manipulação de dados"),
         ("Plotly", "Gráficos interativos"),
-        ("WordCloud", "Visualização de palavras"),
     ]
     cols = st.columns(len(techs))
     for col, (nome, desc) in zip(cols, techs):

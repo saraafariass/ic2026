@@ -12,6 +12,14 @@ TIPO_COR = {
     "Extensão": "#2e7d32",
 }
 
+EVENTO_TIPO_COR = {
+    "Palestra": "#d32f2f",
+    "Publicação": "#7b1fa2",
+    "Oficina": "#388e3c",
+    "Evento": "#1976d2",
+    "Viagem técnica": "#f57c00",
+}
+
 
 def get_css():
     return f"""
@@ -66,6 +74,33 @@ def get_css():
         margin-bottom: 0.8rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         border-left: 3px solid {COR_VERMELHO_GRAFICO};
     }}
+    /* Cards de eventos */
+    .card-evento {{
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.2rem 3.5rem 1.2rem 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        border-left: 4px solid {COR_VERMELHO};
+        transition: all 0.3s ease;
+        position: relative;
+    }}
+    .card-evento:hover {{
+        box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }}
+    .card-evento.destaque {{
+        background: linear-gradient(135deg, #fff5f5 0%, #ffebee 100%);
+        border-left-color: {COR_VERMELHO};
+        box-shadow: 0 6px 10px rgba(198, 40, 40, 0.15);
+        border: 1px solid #ffcdd2;
+    }}
+    .card-evento.destaque::before {{
+        content: '';
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+    }}
 
     /* Badges */
     .alcance-badge {{
@@ -76,12 +111,22 @@ def get_css():
     .badge {{
         font-size: 0.65rem; font-weight: 600;
         padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+        margin-right: 5px; margin-bottom: 3px;
     }}
     .badge-tec  {{ background: #fce4e4; color: {COR_VERMELHO}; border: 1px solid #f7c1c1; }}
     .badge-grad {{ background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }}
     .badge-amb  {{ background: #ede7f6; color: #4527a0; border: 1px solid #ce93d8; }}
     .badge-bols {{ background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }}
     .badge-vert {{ background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }}
+    .badge-local {{ background: #f0f4c3; color: #7cb342; border: 1px solid #aed581; }}
+    .badge-palestra {{ background: #ffebee; color: #c62828; border: 1px solid #e57373; }}
+    .badge-publicacao {{ background: #f3e5f5; color: #7b1fa2; border: 1px solid #ba68c8; }}
+    .badge-oficina {{ background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }}
+    .badge-evento {{ background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }}
+    .badge-viagem {{ background: #fff3e0; color: #f57c00; border: 1px solid #ffcc80; }}
+    .badge-organizacao {{ background: #673ab7; color: white; padding: 3px 10px; }}
+    .badge-ouvinte {{ background: #4caf50; color: white; padding: 3px 10px; }}
+    .badge-participante {{ background: #2196f3; color: white; padding: 3px 10px; }}
 
     /* Labels e valores internos */
     .det-label {{

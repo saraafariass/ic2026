@@ -1,0 +1,3 @@
+libfreetype6-dev
+pkg-config
+build-essential
