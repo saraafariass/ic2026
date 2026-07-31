@@ -896,15 +896,15 @@ with tab_sobre:
     with col_bol:
         st.markdown(f"""
         <div style="background:{CARD};border-radius:10px;padding:1.25rem 1.5rem;
-            box-shadow:0 1px 3px rgba(0,0,0,0.07);border-top:4px solid {COR_VERMELHO_GRAFICO};">
+            box-shadow:0 1px 3px rgba(0,0,0,0.07);border-top:4px solid {COR_VERMELHO};">
             <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;
-                letter-spacing:0.08em;color:{COR_VERMELHO_GRAFICO};margin-bottom:0.5rem;">Bolsista PIBIC</div>
+                letter-spacing:0.08em;color:{COR_VERMELHO};margin-bottom:0.5rem;">Bolsista PIBIC</div>
             <div style="font-size:1.05rem;font-weight:700;color:{TEXTO};">Sara Luiz de Farias</div>
             <div style="font-size:0.82rem;color:{TEXTO_SECUNDARIO};margin-top:0.25rem;">
                 Bacharelanda em Sistemas de Informação<br>
                 IF Goiano - Campus Ceres<br>
                 <a href="http://lattes.cnpq.br/2013698994793152" target="_blank"
-                    style="display:inline-block;margin-top:0.4rem;padding:4px 12px;background:{COR_VERMELHO_GRAFICO};color:#fff;border-radius:5px;font-size:0.75rem;font-weight:600;text-decoration:none;">Acessar currículo Lattes</a>
+                    style="display:inline-block;margin-top:0.4rem;padding:4px 12px;background:{COR_VERMELHO};color:#fff;border-radius:5px;font-size:0.75rem;font-weight:600;text-decoration:none;">Acessar currículo Lattes</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -928,7 +928,7 @@ with tab_sobre:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # Como citar
-    secao("Como citar a plataforma")
+    secao("Como citar o dashboard")
     st.markdown(f"""
     <div style="background:{CARD};border-radius:10px;padding:1.25rem 1.5rem;
         box-shadow:0 1px 3px rgba(0,0,0,0.07);border-left:4px solid {COR_VERMELHO};">
