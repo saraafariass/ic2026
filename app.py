@@ -634,7 +634,7 @@ with tab_projetos:
             st.subheader(tipo_projeto)
             for _, projeto in projetos_tipo.iterrows():
                 st.markdown(f"""
-                <div class="card-projeto">
+                <div class="card-projeto" style="font-size:0.85rem;">
                     <strong>{projeto['nome']}</strong><br>
                     Período: {projeto['periodo']}<br>
                     Detalhes: {projeto.get('detalhes', '')}<br>
