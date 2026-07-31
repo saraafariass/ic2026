@@ -987,9 +987,11 @@ with tab_sobre:
         </div>
         """, unsafe_allow_html=True)
 
+from datetime import datetime
+
 st.markdown("---")
 st.markdown(
-    '<p class="fonte-site" style="text-align: center;">Última atualização: 10/02/2026 13:25</p>',
+    f'<p class="fonte-site" style="text-align: center;">Última atualização: {datetime.now().strftime("%d/%m/%Y %H:%M")}</p>',
     unsafe_allow_html=True,
 )
 st.markdown(
