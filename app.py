@@ -848,11 +848,6 @@ with tab_parcerias:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(
-        f'<p class="fonte-site">Para mais informações sobre parcerias, acesse o site oficial do projeto.</p>',
-        unsafe_allow_html=True,
-    )
-
 # aba sobre
 with tab_sobre:
 
@@ -945,7 +940,7 @@ with tab_sobre:
             <em>Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado.</em>
             Ceres: IF Goiano - Campus Ceres, 2026.
             Disponível em:
-            <a href="https://meninasdigitaisnocerrado.com.br" target="_blank"
+            <a href="https://meninasdigitaisnocerrado.com.br/indicadores" target="_blank"
                 style="color:{COR_VERMELHO};">meninasdigitaisnocerrado.com.br</a>.
             Acesso em: dia mes e ano.
         </div>
