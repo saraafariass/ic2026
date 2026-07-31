@@ -1,140 +1,91 @@
-# 📊 Dashboard MDC - Meninas Digitais no Cerrado
+# Dashboard MDC — Meninas Digitais no Cerrado
 
-<div align="center">
+Dashboard interativo com a sistematização de 10 anos de dados abertos sobre gênero na Computação no Campus Ceres, desenvolvido no âmbito do projeto **Meninas Digitais no Cerrado**.
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red?logo=streamlit)
-![Pandas](https://img.shields.io/badge/Pandas-1.5+-blue?logo=pandas)
-![Plotly](https://img.shields.io/badge/Plotly-5.14+-purple?logo=plotly)
+🔗 **Acesse o dashboard:** [mdc-dashboard.streamlit.app](https://mdc-dashboard.streamlit.app/)
 
-**Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado**
-
-[🚀 Acessar Dashboard](https://meninasdigitaisnocerrado.com.br)
-</div>
+📍 Também disponível embutido na página de [Indicadores](https://meninasdigitaisnocerrado.com.br/indicadores) do site oficial.
 
 ---
 
-## 🎯 Sobre o Projeto
+## Sobre o projeto
 
-Este dashboard apresenta uma visualização interativa dos dados do projeto **Meninas Digitais no Cerrado**, uma iniciativa do **IF Goiano - Campus Ceres** que busca incentivar a participação de meninas e mulheres nos cursos de Computação.
+Este projeto integra o edital institucional **Nº 11 de 03 de abril de 2025 (PIBIC)**, com o tema *"Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado"*.
 
-### 📈 O que você encontrará:
+O dashboard reúne e visualiza dados sobre:
 
-- **📊 Estudantes**: Participação, verticalização e bolsistas
-- **👨‍🏫 Docentes**: Corpo docente e suas produções
-- **🛠️ Projetos**: Por tipo (Ensino, Pesquisa, Extensão)
-- **📚 Publicações**: Artigos e trabalhos científicos
-- **🎉 Eventos e Premiações**: Participações e conquistas
-- **🤝 Parcerias**: Redes e colaborações
+- **Estudantes** — participação de alunas no Ensino Médio Técnico e na Graduação
+- **Docentes** — corpo docente envolvido no projeto
+- **Projetos** — iniciativas de ensino, pesquisa e extensão
+- **Publicações** — produção científica ao longo dos anos
+- **Eventos e Premiações** — participações e reconhecimentos
+- **Parcerias** — articulação com a Rede Nacional RENACEE_MD
 
----
+## Equipe
 
-## 🚀 Como Usar
+| Papel | Nome |
+|---|---|
+| Bolsista PIBIC | Sara Luiz de Farias |
+| Coordenadora | Profa. Thalia Santos de Santana |
 
-### Localmente
+**Instituição:** IF Goiano — Campus Ceres
 
-1. **Clone o repositório:**
-```bash
-git clone https://github.com/saraafariass/ic2026.git
-cd ic2026
-```
+## Tecnologias utilizadas
 
-2. **Crie e ative o ambiente virtual:**
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou
-venv\Scripts\activate  # Windows
-```
+- [Python](https://www.python.org/)
+- [Streamlit](https://streamlit.io/) — interface web interativa
+- [Pandas](https://pandas.pydata.org/) — manipulação de dados
+- [Plotly](https://plotly.com/python/) — gráficos interativos
 
-3. **Instale as dependências:**
-```bash
-pip install -r requirements.txt
-```
-
-4. **Execute o dashboard:**
-```bash
-streamlit run app.py
-```
-
-O dashboard abrirá no navegador em `http://localhost:8501`
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-| Tecnologia | Descrição |
-|------------|-----------|
-| ![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python) | Linguagem principal |
-| ![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red?logo=streamlit) | Interface web interativa |
-| ![Pandas](https://img.shields.io/badge/Pandas-1.5+-blue?logo=pandas) | Manipulação de dados |
-| ![Plotly](https://img.shields.io/badge/Plotly-5.14+-purple?logo=plotly) | Gráficos interativos |
-| ![WordCloud](https://img.shields.io/badge/WordCloud-1.8+-orange?logo=python) | Visualização de palavras |
-
----
-
-## 📁 Estrutura do Projeto
+## Estrutura do repositório
 
 ```
 ic2026/
-├── app.py                  # Arquivo principal do dashboard
-├── requirements.txt        # Dependências do projeto
-├── README.md              # Documentação
-├── alunas.csv             # Dados das alunas
-├── docentes.csv           # Dados dos docentes
-├── projetos.csv           # Dados dos projetos
-├── publicacoes.csv        # Dados das publicações
-├── eventos.csv            # Dados dos eventos
-├── premiacoes.csv         # Dados das premiações
-├── parcerias.csv          # Dados das parcerias
+├── app.py                 # aplicação principal (Streamlit)
+├── requirements.txt       # dependências Python
 ├── assets/
-│   └── styles.py          # Estilos personalizados
-└── icframework/           # Framework do IF Goiano
+│   └── styles.py           # estilos (CSS) do dashboard
+├── alunas.csv
+├── docentes.csv
+├── projetos.csv
+├── publicacoes.csv
+├── premiacoes.csv
+└── eventos.csv
+```
+
+## Como rodar localmente
+
+```bash
+# clonar o repositório
+git clone https://github.com/saraafariass/ic2026.git
+cd ic2026
+
+# instalar as dependências
+pip install -r requirements.txt
+
+# rodar o dashboard
+streamlit run app.py
+```
+
+O dashboard abrirá automaticamente em `http://localhost:8501`.
+
+## Deploy
+
+O dashboard está hospedado gratuitamente no [Streamlit Community Cloud](https://share.streamlit.io/), conectado diretamente a este repositório. Qualquer atualização enviada para a branch `main` é refletida automaticamente no app publicado.
+
+## Fontes dos dados
+
+Os dados são atualizados manualmente a partir das informações disponíveis no [site oficial do projeto](https://meninasdigitaisnocerrado.com.br).
+
+## Como citar
+
+```
+MENINAS DIGITAIS NO CERRADO. Sistematização de dados abertos sobre gênero
+na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado.
+Ceres: IF Goiano - Campus Ceres, 2026. Disponível em:
+https://meninasdigitaisnocerrado.com.br. Acesso em: dia mês ano.
 ```
 
 ---
 
-## 📊 Dados Abertos
-
-Todos os dados são abertos e podem ser acessados em:
-- [Projetos](https://meninasdigitaisnocerrado.com.br/projetos)
-- [Publicações](https://meninasdigitaisnocerrado.com.br/publicacoes)
-- [Premiações](https://meninasdigitaisnocerrado.com.br/premiacoes)
-
----
-
-## 👥 Equipe
-
-| Papel | Nome | GitHub | Lattes |
-|-------|------|--------|--------|
-| 💻 Bolsista PIBIC | Sara Luiz de Farias | [@saraafariass](https://github.com/saraafariass) | [Currículo](http://lattes.cnpq.br/2013698994793152) |
-| 👩‍🏫 Coordenadora | Profa. Thalia Santos de Santana | - | [Currículo](http://lattes.cnpq.br/8063677996827079) |
-
----
-
-## 📝 Como Citar
-
-```
-(Meninas Digitais no Cerrado, 2026)
-```
-
-**Referência bibliográfica completa:**
-
-MENINAS DIGITAIS NO CERRADO. *Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado.* Ceres: IF Goiano - Campus Ceres, 2026. Disponível em: [meninasdigitaisnocerrado.com.br](https://meninasdigitaisnocerrado.com.br). Acesso em: dia mes e ano.
-
----
-
-## 📄 Licença
-
-Este projeto está licenciado sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
-
-<div align="center">
-
-**Feito com ❤️ por Sara Farias (Meninas Digitais no Cerrado)**
-
-[![GitHub](https://img.shields.io/badge/GitHub-100000?logo=github)](https://github.com/saraafariass/ic2026)
-[![Gmail](https://img.shields.io/badge/Gmail-D14836?logo=gmail)](mailto:meninasdigitais@ceres.ifgoiano.edu.br)
-
-</div>
+Feito com 🤍 por Sara Farias — Meninas Digitais no Cerrado
