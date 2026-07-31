@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from datetime import datetime
 
 from assets.styles import (
     get_css, COR_VERMELHO, COR_VERMELHO_GRAFICO,
@@ -987,11 +988,9 @@ with tab_sobre:
         </div>
         """, unsafe_allow_html=True)
 
-from datetime import datetime
-
 st.markdown("---")
 st.markdown(
-    f'<p class="fonte-site" style="text-align: center;">Última atualização: {datetime.now().strftime("%d/%m/%Y %H:%M")}</p>',
+    f'<p class="fonte-site" style="text-align: center;">Última atualização: {datetime.now().strftime("%d/%m/%Y")}</p>',
     unsafe_allow_html=True,
 )
 st.markdown(
