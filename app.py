@@ -43,7 +43,7 @@ def card_publicacao(p, alcance_cor, btn=''):
 
 def card_publicacao_lista(pub, cor_vermelho, texto, texto_secundario):
     ref = str(pub.get('referencia', ''))
-    aut = str(pub.get('autores', 'Não informado'))
+    aut = str(pub.get('autoria', 'Não informado'))
     alcance = str(pub.get('alcance', ''))
     link_pub = str(pub.get('link', '')).strip()
     tem_link = pd.notna(pub.get('link')) and link_pub
@@ -58,7 +58,7 @@ def card_publicacao_lista(pub, cor_vermelho, texto, texto_secundario):
         f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">'
         f'<span class="alcance-badge">' + alcance + '</span>' + btn_html + '</div>'
         f'<p style="margin:0.4rem 0 0.3rem;font-weight:500;color:{texto};">' + ref + '</p>'
-        f'<small style="color:{texto_secundario};">Autores: ' + aut + '</small>'
+        f'<small style="color:{texto_secundario};">Autoria: ' + aut + '</small>'
         '</div>'
     )
     st.markdown(card_html, unsafe_allow_html=True)
@@ -180,7 +180,7 @@ def encontrar_projetos_por_pessoa(nome, projetos_df):
     busca = _nome_busca(nome)
     return [
         p for _, p in projetos_df.iterrows()
-        if busca in str(p.get('equipe', p.get('autores', ''))).lower()
+        if busca in str(p.get('equipe', p.get('autoria', ''))).lower()
     ]
 
 
@@ -188,7 +188,7 @@ def encontrar_publicacoes_por_pessoa(nome, publicacoes_df):
     busca = _nome_busca(nome)
     return [
         p for _, p in publicacoes_df.iterrows()
-        if busca in str(p.get('autores', '')).lower()
+        if busca in str(p.get('autoria', '')).lower()
     ]
 
 
@@ -638,7 +638,7 @@ with tab_projetos:
                     <strong>{projeto['nome']}</strong><br>
                     Período: {projeto['periodo']}<br>
                     Detalhes: {projeto.get('detalhes', '')}<br>
-                    <small>Integrantes: {projeto.get('equipe', projeto.get('autores', 'Não informado'))}</small>
+                    <small>Integrantes: {projeto.get('equipe', projeto.get('autoria', 'Não informado'))}</small>
                 </div>
                 """, unsafe_allow_html=True)
 
