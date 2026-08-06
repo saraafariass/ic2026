@@ -801,7 +801,7 @@ with tab_projetos:
         if len(projetos_tipo) > 0:
             st.subheader(tipo_projeto)
             for _, projeto in projetos_tipo.iterrows():
-                label = f"{projeto['nome']} – {projeto['periodo']}"
+                label = f"{projeto['nome']} - {projeto['periodo']}"
                 with st.expander(label):
                     st.markdown(f"""
                     <div style="font-size:0.85rem; line-height:1.6;">
