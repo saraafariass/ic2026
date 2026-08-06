@@ -807,9 +807,11 @@ with tab_projetos:
                     <div style="font-size:0.85rem; line-height:1.6;">
                         <strong>Equipe:</strong> {projeto.get('equipe', 'Não informado')}<br>
                         <strong>Período:</strong> {projeto['periodo']}<br>
-                        <strong>Detalhes: {projeto.get('detalhes', '')}</strong><br>
-                        <details>
-
+                        <strong>Detalhes:</strong>
+                        <div style="background:#fafafa; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem; white-space:pre-wrap;">
+                            {projeto.get('detalhes', '')}
+                        </div>
+                        <details style="margin-top:0.8rem;">
                             <summary style="cursor:pointer; color:{COR_VERMELHO}; font-weight:600;">Ver resumo</summary>
                             <div style="background:#f5f5f5; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem;">
                                 {projeto.get('resumo', '')}
@@ -819,7 +821,7 @@ with tab_projetos:
                     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    secao("Nuvem de palavras (baseada nos resumos dos projetos)")
+    secao("Nuvem de palavras (baseada nos resumos dos projetos")
 
     if not projetos_periodo.empty:
         textos = projetos_periodo['resumo'].dropna().astype(str).tolist()
