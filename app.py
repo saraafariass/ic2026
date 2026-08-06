@@ -808,6 +808,7 @@ with tab_projetos:
                         <strong>Equipe:</strong> {projeto.get('equipe', 'Não informado')}<br>
                         <strong>Período:</strong> {projeto['periodo']}<br>
                         <strong>Detalhes: {projeto.get('detalhes', '')}</strong><br>
+                        <details>
 
                             <summary style="cursor:pointer; color:{COR_VERMELHO}; font-weight:600;">Ver resumo</summary>
                             <div style="background:#f5f5f5; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem;">
