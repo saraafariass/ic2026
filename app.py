@@ -200,7 +200,11 @@ def carregar_dados():
     publicacoes = pd.read_csv("publicacoes.csv")
     premiacoes = pd.read_csv("premiacoes.csv")
     eventos = pd.read_csv("eventos.csv")
-    return alunas, docentes, projetos, publicacoes, premiacoes, eventos
+    parcerias = pd.read_csv("parcerias.csv")
+    # Converte coluna 'ano' para inteiro em eventos e premiações
+    eventos['ano'] = pd.to_numeric(eventos['ano'], errors='coerce').astype('Int64')
+    premiacoes['ano'] = pd.to_numeric(premiacoes['ano'], errors='coerce').astype('Int64')
+    return alunas, docentes, projetos, publicacoes, premiacoes, eventos, parcerias
 
 
 
@@ -221,7 +225,7 @@ def badge_curso(curso):
         return '<span class="badge badge-amb">Técnico + Graduação</span>'
 
 
-alunas, docentes, projetos, publicacoes, premiacoes, eventos = carregar_dados()
+alunas, docentes, projetos, publicacoes, premiacoes, eventos, parcerias = carregar_dados()
 
 ano_min, ano_max = 2016, 2026
 
@@ -740,9 +744,19 @@ with tab_eventos:
         st.plotly_chart(fig_eventos, use_container_width=True)
 
 
-    # Cards de eventos por tipo
+    # Cards de eventos 
     st.markdown("---")
-    secao("Eventos por tipo")
+    secao("Eventos por categoria")
+    
+    # Definições dos tipos de participação
+    st.markdown("""
+    <div style="background:#f5f5f5;border-radius:8px;padding:1rem;margin-bottom:1.5rem;font-size:0.85rem;color:#666;line-height:1.6;">
+        <strong>Padrão adotado: As definições acima foram estabelecidas conforme a padronização do Currículo Lattes</strong><br>
+        <strong>Organização:</strong> Atuação na organização e promoção do evento.<br>
+        <strong>Participante:</strong> Apresentação de trabalhos, publicação de artigos, palestras dadas ou condução de oficinas.<br>
+        <strong>Ouvinte:</strong> Presença no evento para assistir às apresentações e palestras.
+    </div>
+    """, unsafe_allow_html=True)
 
     atividades = [
         {"label": "Organização", "cor": "#673ab7", "funcao": "Organização"},
@@ -829,24 +843,50 @@ with tab_eventos:
         st.info("Nenhuma premiação no período.")
 
     st.markdown(
-        f'<p class="fonte-site" style="margin-top: 2rem;">Fonte: <a href="https://meninasdigitaisnocerrado.com.br/premiacoes" target="_blank">meninasdigitaisnocerrado.com.br</a></p>',
+        f'<p class="fonte-site" style="margin-top: 2rem;">Fonte: <a href="https://meninasdigitaisnocerrado.com.br/premiacoes" target="_blank">meninasdigitaisnocerrado.com.br/premiacoes</a></p>',
         unsafe_allow_html=True,
     )
 
 # aba parcerias
 with tab_parcerias:
+    secao("Parcerias")
 
-    st.markdown(f"""
-    <div style="background:{CARD};border-radius:10px;padding:1.5rem 2rem;
-        box-shadow:0 1px 3px rgba(0,0,0,0.07);line-height:1.8;color:{TEXTO};font-size:0.95rem;">
-        O projeto integra a <strong>Rede Nacional de Educação e Extensão Meninas Digitais (RENACEE_MD)</strong>,
-        iniciativa aprovada na chamada CNPq/MCTI/Mulheres nº 31/2023 e coordenada pela Profa. Luciana Cardoso de Castro Salgado (UFF).
-        Esta parceria nacional fortalece nossas ações com o objetivo de aumentar a participação feminina nas áreas STEM,
-        diminuir a evasão das estudantes nos cursos de Computação e estimular a igualdade de gênero.
-        <br><br>
-        <strong>Período:</strong> 2025 - 2027
-    </div>
-    """, unsafe_allow_html=True)
+    if not parcerias.empty:
+        import html
+
+        for _, parceria in parcerias.iterrows():
+            nome = str(parceria.get('nome', ''))
+            descricao = str(parceria.get('descricao', '')).replace('\n', ' ')
+            ano_ini = str(parceria.get('ano_ini', ''))
+            ano_fim = str(parceria.get('ano_fim', ''))
+            link = str(parceria.get('link', '')).strip()
+
+            # Formata o período
+            periodo = f"{ano_ini} - {ano_fim}" if ano_fim and ano_fim != 'nan' else ano_ini
+
+            # Botão de link se existir
+            btn_link = ''
+            if link and link != 'nan' and link != '':
+                btn_link = f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.5rem;padding:4px 12px;background:{COR_VERMELHO};color:#fff;border-radius:6px;font-size:0.7rem;font-weight:600;text-decoration:none;">Acessar site</a>'
+
+            nome_escaped = html.escape(nome)
+            descricao_escaped = html.escape(descricao)
+            descricao_formatada = descricao_escaped.replace('\n', '<br>')
+
+            html_card = (
+                f'<div class="card-publicacao" style="margin-bottom:1.5rem;">'
+                f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">'
+                f'<span class="alcance-badge" style="background:{COR_VERMELHO};">{periodo}</span>'
+                f'{btn_link}'
+                f'</div>'
+                f'<p style="margin:0.4rem 0 0.3rem;font-weight:500;color:{TEXTO};">{nome_escaped}</p>'
+                f'<p style="margin:0.2rem 0 0;color:{TEXTO_SECUNDARIO};line-height:1.6;">{descricao_formatada}</p>'
+                f'</div>'
+            )
+
+            st.markdown(html_card, unsafe_allow_html=True)
+    else:
+        st.info("Nenhuma parceria cadastrada.")
 
 # aba sobre
 with tab_sobre:
