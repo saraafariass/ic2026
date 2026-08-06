@@ -792,7 +792,7 @@ with tab_projetos:
         fig.update_traces(textposition='outside')
         st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("---")
+        st.markdown("---")
     secao("Lista de projetos")
 
     for tipo_projeto in ["Ensino", "Pesquisa", "Extensão"]:
@@ -800,14 +800,21 @@ with tab_projetos:
         if len(projetos_tipo) > 0:
             st.subheader(tipo_projeto)
             for _, projeto in projetos_tipo.iterrows():
-                st.markdown(f"""
-                <div class="card-projeto" style="font-size:0.85rem;">
-                    <strong>{projeto['nome']}</strong><br>
-                    Período: {projeto['periodo']}<br>
-                    Detalhes: {projeto.get('detalhes', '')}<br>
-                    <small>Integrantes: {projeto.get('equipe', projeto.get('autoria', 'Não informado'))}</small>
-                </div>
-                """, unsafe_allow_html=True)
+                label = f"{projeto['nome']} – {projeto['periodo']}"
+                with st.expander(label):
+                    st.markdown(f"""
+                    <div style="font-size:0.85rem; line-height:1.6;">
+                        <strong>Equipe:</strong> {projeto.get('equipe', 'Não informado')}<br>
+                        <strong>Período:</strong> {projeto['periodo']}<br>
+                        <strong>Detalhes:</strong> {projeto.get('detalhes', '')}<br>
+                        <details style="margin-top:0.8rem;">
+                            <summary style="cursor:pointer; color:{COR_VERMELHO}; font-weight:600;">Ver resumo do projeto</summary>
+                            <div style="background:#f5f5f5; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem;">
+                                {projeto.get('resumo', '')}
+                            </div>
+                        </details>
+                    </div>
+                    """, unsafe_allow_html=True)
 
     st.markdown("---")
     secao("Nuvem de palavras dos projetos")
