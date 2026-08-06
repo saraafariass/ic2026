@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 
 from assets.styles import (
     get_css, COR_VERMELHO, COR_VERMELHO_GRAFICO,
@@ -792,7 +794,7 @@ with tab_projetos:
         fig.update_traces(textposition='outside')
         st.plotly_chart(fig, use_container_width=True)
 
-        st.markdown("---")
+    st.markdown("---")
     secao("Lista de projetos")
 
     for tipo_projeto in ["Ensino", "Pesquisa", "Extensão"]:
@@ -806,9 +808,12 @@ with tab_projetos:
                     <div style="font-size:0.85rem; line-height:1.6;">
                         <strong>Equipe:</strong> {projeto.get('equipe', 'Não informado')}<br>
                         <strong>Período:</strong> {projeto['periodo']}<br>
-                        <strong>Detalhes:</strong> {projeto.get('detalhes', '')}<br>
+                        <strong>Detalhes:</strong>
+                        <div style="background:#fafafa; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem; white-space:pre-wrap;">
+                            {projeto.get('detalhes', '')}
+                        </div>
                         <details style="margin-top:0.8rem;">
-                            <summary style="cursor:pointer; color:{COR_VERMELHO}; font-weight:600;">Ver resumo do projeto</summary>
+                            <summary style="cursor:pointer; color:{COR_VERMELHO}; font-weight:600;">Ver resumo</summary>
                             <div style="background:#f5f5f5; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem;">
                                 {projeto.get('resumo', '')}
                             </div>
@@ -817,7 +822,44 @@ with tab_projetos:
                     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    secao("Nuvem de palavras dos projetos")
+    secao("Nuvem de palavras (baseada nos resumos dos projetos)")
+
+    if not projetos_periodo.empty:
+        textos = projetos_periodo['resumo'].dropna().astype(str).tolist()
+        if textos:
+            texto_completo = ' '.join(textos)
+            
+            # Stopwords em português
+            stopwords = set([
+                'de', 'da', 'do', 'e', 'para', 'com', 'em', 'uma', 'os', 'as', 'que', 'na', 'no', 'por', 'se',
+                'é', 'ao', 'aos', 'das', 'dos', 'como', 'mais', 'entre', 'são', 'ser', 'ter', 'seu', 'sua',
+                'foi', 'foram', 'vai', 'pode', 'também', 'mas', 'ou', 'quando', 'onde', 'já', 'não', 'sim',
+                'este', 'esta', 'isso', 'aquele', 'aquela', 'estes', 'estas', 'esses', 'essas', 'à', 'às',
+                'esse', 'essa', 'eles', 'elas', 'meu', 'minha', 'teu', 'tua', 'nosso', 'nossa', 'vosso', 'vossa',
+                'me', 'te', 'nos', 'vos', 'lhe', 'lhes', 'o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas',
+                'pelo', 'pela', 'pelos', 'pelas', 'ao', 'aos', 'à', 'às', 'no', 'nos', 'na', 'nas',
+                'sobre', 'entre', 'até', 'desde', 'sem', 'contra', 'por', 'perante', 'após', 'sob', 'durante',
+                'cerca', 'conforme', 'exceto', 'mediante', 'salvo', 'segundo', 'tirante', 'visto'
+            ])
+
+            wordcloud = WordCloud(
+                width=800,
+                height=400,
+                background_color='white',
+                stopwords=stopwords,
+                max_words=80,
+                colormap='Reds',
+                collocations=False
+            ).generate(texto_completo)
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.imshow(wordcloud, interpolation='bilinear')
+            ax.axis('off')
+            st.pyplot(fig)
+        else:
+            st.info("Nenhum resumo disponível para gerar a nuvem.")
+    else:
+        st.info("Nenhum projeto no período para gerar a nuvem.")
 
    
 
