@@ -216,13 +216,29 @@ def iniciais(nome):
     return partes[0][:2].upper()
 
 
-def badge_curso(curso):
-    if curso == "Técnico":
-        return '<span class="badge badge-tec">Técnico</span>'
-    elif curso == "Graduação":
-        return '<span class="badge badge-grad">Graduação</span>'
-    else:
-        return '<span class="badge badge-amb">Técnico + Graduação</span>'
+def badge_curso(curso_str):
+    """Gera badges para múltiplos cursos separados por ';'"""
+    if pd.isna(curso_str) or str(curso_str).strip() == '':
+        return ''
+    
+    cursos = get_cursos_list(curso_str)
+    badges = []
+    
+    for curso in cursos:
+        curso = curso.strip()
+        if "Técnico" in curso:
+            badges.append('<span class="badge badge-tec">Técnico</span>')
+        elif "Graduação" in curso or "Licenciatura" in curso or "Bacharelado" in curso:
+            badges.append('<span class="badge badge-grad">Graduação</span>')
+    
+    return ' '.join(badges)
+
+
+def get_cursos_list(curso_str):
+    """Converte string de cursos em lista, separando por ';'"""
+    if pd.isna(curso_str) or str(curso_str).strip() == '':
+        return []
+    return [c.strip() for c in str(curso_str).split(';')]
 
 
 alunas, docentes, projetos, publicacoes, premiacoes, eventos, parcerias = carregar_dados()
@@ -268,11 +284,11 @@ with tab_est:
     alunas_filtradas = alunas_periodo.copy()
 
     if filtro_curso == "Técnico":
-        alunas_filtradas = alunas_filtradas[alunas_filtradas["curso"].isin(["Técnico", "Técnico e Graduação"])]
+        alunas_filtradas = alunas_filtradas[alunas_filtradas["curso"].apply(lambda x: "Técnico" in str(x))]
     elif filtro_curso == "Graduação":
-        alunas_filtradas = alunas_filtradas[alunas_filtradas["curso"].isin(["Graduação", "Técnico e Graduação"])]
+        alunas_filtradas = alunas_filtradas[alunas_filtradas["curso"].apply(lambda x: "Graduação" in str(x) or "Licenciatura" in str(x) or "Bacharelado" in str(x))]
     elif filtro_curso == "Técnico e Graduação":
-        alunas_filtradas = alunas_filtradas[alunas_filtradas["curso"] == "Técnico e Graduação"]
+        alunas_filtradas = alunas_filtradas[alunas_filtradas["curso"].apply(lambda x: "Técnico" in str(x) and ("Graduação" in str(x) or "Licenciatura" in str(x) or "Bacharelado" in str(x)))]
 
     if filtro_verticalizou != "Todas":
         alunas_filtradas = alunas_filtradas[alunas_filtradas["verticalizou"] == filtro_verticalizou]
@@ -280,37 +296,87 @@ with tab_est:
     if filtro_bolsista != "Todas":
         alunas_filtradas = alunas_filtradas[alunas_filtradas["bolsista"] == filtro_bolsista]
 
-    alunas_tecnico = alunas_filtradas[alunas_filtradas["curso"].isin(["Técnico", "Técnico e Graduação"])]
-    alunas_graduacao = alunas_filtradas[alunas_filtradas["curso"].isin(["Graduação", "Técnico e Graduação"])]
-
+    # Contar alunas que fizeram Técnico (incluindo as que fizeram só Técnico e as que fizeram Técnico+Graduação)
+    alunas_tecnico = alunas_filtradas[alunas_filtradas["curso"].apply(
+        lambda x: any("Técnico" in c for c in get_cursos_list(x))
+    )]
+    
+    # Contar alunas que fizeram Graduação (incluindo as que fizeram só Graduação e as que fizeram Técnico+Graduação)
+    alunas_graduacao = alunas_filtradas[alunas_filtradas["curso"].apply(
+        lambda x: any("Graduação" in c or "Licenciatura" in c or "Bacharelado" in c for c in get_cursos_list(x))
+    )]
+    
     st.markdown("### Ensino Médio Técnico")
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Total de alunas", len(alunas_tecnico))
     with col2:
+        verticalizou_count = len(alunas_tecnico[alunas_tecnico["verticalizou"] == "Sim"]) if not alunas_tecnico.empty and "verticalizou" in alunas_tecnico.columns else 0
         st.metric(
             "Verticalizaram",
-            len(alunas_tecnico[alunas_tecnico["verticalizou"] == "Sim"]),
+            verticalizou_count,
         )
     with col3:
+        bolsistas_count = len(alunas_tecnico[alunas_tecnico["bolsista"] == "Sim"]) if not alunas_tecnico.empty and "bolsista" in alunas_tecnico.columns else 0
         st.metric(
             "Bolsistas",
-            len(alunas_tecnico[alunas_tecnico["bolsista"] == "Sim"]),
+            bolsistas_count,
         )
 
     st.markdown("---")
 
     st.markdown("### Bacharelado em Sistemas de Informação")
+    
+    # Contar alunas de graduação (incluindo as que têm múltiplos cursos)
+    total_graduacao = 0
+    bolsistas_graduacao = 0
+    
+    for _, aluna in alunas_filtradas.iterrows():
+        cursos = get_cursos_list(aluna['curso'])
+        # Verifica se tem algum curso de graduação
+        tem_graduacao = any(
+            "Graduação" in c or "Licenciatura" in c or "Bacharelado" in c 
+            for c in cursos
+        )
+        if tem_graduacao:
+            total_graduacao += 1
+            if aluna['bolsista'] == 'Sim':
+                bolsistas_graduacao += 1
+    
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Total de alunas", len(alunas_graduacao))
+        st.metric("Total de alunas", total_graduacao)
     with col2:
         st.metric(
             "Bolsistas",
-            len(alunas_graduacao[alunas_graduacao["bolsista"] == "Sim"]),
+            bolsistas_graduacao,
         )
 
+    # --- OBSERVAÇÃO SOBRE DUPLA CONTAGEM ---
+    # Verifica se há alunas que estão em ambas as categorias
+    alunas_tec_e_grad = alunas_filtradas[
+        alunas_filtradas["curso"].apply(
+            lambda x: any("Técnico" in c for c in get_cursos_list(x))
+        ) &
+        alunas_filtradas["curso"].apply(
+            lambda x: any("Graduação" in c or "Licenciatura" in c or "Bacharelado" in c for c in get_cursos_list(x))
+        )
+    ]
+
+    if not alunas_tec_e_grad.empty:
+        nomes = ", ".join(alunas_tec_e_grad["nome"].tolist())
+        st.markdown(f"""
+        <div style="background:#fff3cd;border-left:4px solid #ffc107;padding:0.6rem 1rem;
+            border-radius:4px;margin-top:1rem;font-size:0.85rem;color:#856404;">
+            <strong>Observação:</strong> As alunas <strong>{nomes}</strong> aparecem em <strong>ambas</strong> as categorias 
+            (cursaram Técnico <em>e</em> Graduação). Por isso, a soma dos totais (Técnico + Graduação) é <strong>35</strong>, 
+            mas o <strong>total único de alunas no período é {len(alunas_filtradas)}</strong>.
+        </div>
+        """, unsafe_allow_html=True)
+
     st.markdown("---")
+
+
 
     # Info de resultados 
     total_filtradas = len(alunas_filtradas)
@@ -364,7 +430,17 @@ with tab_est:
                     <div class="det-valor">{aluna['bolsista']}</div>
                     <div class="det-label">Verticalizou</div>
                     <div class="det-valor">{vert_display}</div>
+                    <div class="det-label">Curso</div>
+                    <div class="det-valor">{aluna['curso']}</div>
                     """, unsafe_allow_html=True)
+                    
+                    # Mostrar observação se existir
+                    observacao = str(aluna.get('observacao', '')).strip()
+                    if observacao and observacao != 'nan':
+                        st.markdown(f"""
+                        <div class="det-label" style="margin-top:0.65rem;">Observação</div>
+                        <div class="det-valor" style="font-size:0.8rem;color:{TEXTO_SECUNDARIO};">{observacao}</div>
+                        """, unsafe_allow_html=True)
 
                 with proj_col:
                     if is_thalia:
@@ -464,6 +540,93 @@ with tab_est:
                         else:
                             st.caption("Nenhuma publicação no período")
 
+    # Gráficos de distribuição - após os cards
+    secao("Indicadores de Raça")
+    
+    # Gráfico 1: Pizza por Raça/Etnia
+    if not alunas_filtradas.empty and 'raca' in alunas_filtradas.columns:
+        raca_count = alunas_filtradas['raca'].value_counts().reset_index()
+        raca_count.columns = ['Raça/Etnia', 'Quantidade']
+        
+        fig_raca = px.pie(
+            raca_count, 
+            names='Raça/Etnia', 
+            values='Quantidade',
+            color_discrete_sequence=['#e57373', '#c62828', '#b71c1c', '#880e4f', '#4a148c']
+        )
+        fig_raca.update_layout(
+            height=400,
+            paper_bgcolor=FUNDO,
+            plot_bgcolor=FUNDO,
+            showlegend=True
+        )
+        st.plotly_chart(fig_raca, use_container_width=True)
+    
+    secao("Indicadores de Curso")
+    
+    if not alunas_filtradas.empty:
+        # Contar alunas únicas por curso (cada aluna conta apenas uma vez)
+        cursos_contagem = {}
+        alunas_contadas = set()
+        
+        for idx, aluna in alunas_filtradas.iterrows():
+            aluna_id = f"{aluna['nome']}_{aluna['periodo']}"
+            
+            if aluna_id not in alunas_contadas:
+                alunas_contadas.add(aluna_id)
+                cursos = get_cursos_list(aluna['curso'])
+                for curso in cursos:
+                    # Normalizar nome do curso
+                    curso_normalizado = curso
+                    if 'Técnico em Informática para Internet' in curso:
+                        curso_normalizado = 'Técnico em Informática para Internet'
+                    elif 'Técnico em Informática' in curso:
+                        curso_normalizado = 'Técnico em Informática'
+                    elif 'Técnico em Agropecuária' in curso:
+                        curso_normalizado = 'Técnico em Agropecuária'
+                    elif 'Técnico em Inteligência Artificial' in curso:
+                        curso_normalizado = 'Técnico em Inteligência Artificial'
+                    elif 'Licenciatura em Química' in curso:
+                        curso_normalizado = 'Licenciatura em Química'
+                    elif 'Bacharelado em Sistemas de Informação' in curso:
+                        curso_normalizado = 'Bacharelado em Sistemas de Informação'
+                    
+                    cursos_contagem[curso_normalizado] = cursos_contagem.get(curso_normalizado, 0) + 1
+        
+        if cursos_contagem:
+            cursos_df = pd.DataFrame([
+                {'Curso': curso, 'Quantidade': qtd}
+                for curso, qtd in cursos_contagem.items()
+            ])
+            
+            # Ordenar cursos na ordem especificada
+            ordem_especifica = [
+                'Técnico em Informática para Internet',
+                'Técnico em Informática',
+                'Técnico em Agropecuária',
+                'Técnico em Inteligência Artificial',
+                'Licenciatura em Química',
+                'Bacharelado em Sistemas de Informação'
+            ]
+            cursos_df['ordem'] = cursos_df['Curso'].apply(
+                lambda x: ordem_especifica.index(x) if x in ordem_especifica else len(ordem_especifica)
+            )
+            cursos_df = cursos_df.sort_values('ordem')
+            
+            fig_curso = px.pie(
+                cursos_df,
+                names='Curso',
+                values='Quantidade',
+                color_discrete_sequence=['#e57373', '#c62828', '#b71c1c', '#880e4f', '#4a148c', '#311b92']
+            )
+            fig_curso.update_layout(
+                height=400,
+                paper_bgcolor=FUNDO,
+                plot_bgcolor=FUNDO,
+                showlegend=True
+            )
+            st.plotly_chart(fig_curso, use_container_width=True)
+
 # aba docentes
 with tab_doc:
     secao("Corpo docente")
@@ -480,7 +643,7 @@ with tab_doc:
 
         nome_exibido = _nome_base(docente["nome"]).title()
         
-        # Verificar se é a Thalia para mostrar separação por papel
+        # Verificar se é a Thalia para mostrar separação por cargo
         is_thalia = 'thalia' in nome_exibido.lower()
         
         label = f"{docente['nome']}"
