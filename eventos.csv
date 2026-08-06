@@ -4,28 +4,29 @@ ano,nome,funcao,tipo_atividade,local,link
 # Organização: Atuação na organização e promoção do evento.
 # Participante: Apresentação de trabalhos, publicação de artigos, palestras dadas ou condução de oficinas.
 # Ouvinte: Presença no evento para assistir às apresentações e palestras.
-2026,Women in Information Technology (WIT),Participante,Publicação,Gramado - RS,https://sol.sbc.org.br/index.php/wit/article/view/43390/43154
+2026,XX Women in Information Technology (WIT),Participante,Publicação,Gramado - RS,https://sol.sbc.org.br/index.php/wit/article/view/43390/43154
 2026,OBI das Meninas,Organização,Oficina,IF Goiano - Campus Ceres
 2026,Pint of Science,Participante,Palestra,Caseirinhos de Cada Dia (Ceres - GO)
-2026,Encontro de Mulheres e Meninas nas Ciências,Organização,Evento,IF Goiano - Campus Ceres
+2026,II Encontro de Mulheres e Meninas nas Ciências,Organização,Evento,IF Goiano - Campus Ceres
 2026,Acolhimento de Calouras,Organização,Evento,IF Goiano - Campus Ceres
 2025,Feira de Ciência e Tecnologia,Organização,Oficina,IF Goiano - Campus Ceres
 2025,Escola Regional de Informática de Goiás (ERIGO),Participante,Publicação,Escola SESI/SENAI (Luziânia - GO),https://sol.sbc.org.br/index.php/erigo/article/view/39524
-2025,Integra IF Goiano,Participante,Publicação,IF Goiano - Campus Rio Verde,https://eventos.ifgoiano.edu.br/media/arquivos/ANAIS_2025_XIV_CPPG_compressed.pdf#page=1229
-2025,Congresso Latino-Americano de Mulheres na Computação (LAWCC),Participante,Publicação,Pontificia Universidad Católica de Valparaíso (PUCV) - Chile,https://ceur-ws.org/Vol-4185/paper3.pdf
-2025,Women in Information Technology (WIT),Participante,Evento,Maceió - AL
-2025,Simpósio Brasileiro de Educação em Computação (EduComp),Participante,Oficina,Juiz de Fora - MG
+2025,VII Integra IF Goiano,Participante,Publicação,IF Goiano - Campus Rio Verde,https://eventos.ifgoiano.edu.br/media/arquivos/ANAIS_2025_XIV_CPPG_compressed.pdf#page=1229
+2025,XVII Congresso Latino-Americano de Mulheres na Computação (LAWCC),Participante,Publicação,Pontificia Universidad Católica de Valparaíso (PUCV) - Chile,https://ceur-ws.org/Vol-4185/paper3.pdf
+2025,XIX Women in Information Technology (WIT),Participante,Evento,Maceió - AL
+2025,5ª Simpósio Brasileiro de Educação em Computação (EduComp),Participante,Oficina,Juiz de Fora - MG
 2025,International Women's Day (IWD Cerrado),Ouvinte,Evento,Goiânia - GO
 2025,Capacitação "Do Circuito ao Código",Organização,Oficina,IF Goiano - Campus Ceres
 2025,Estratégia de Comunicação Científica no Instagram,Participante,Palestra,Online
-2025,Aniversário do Meninas Digitais no Cerrado,Organização,Evento, IF Goiano - Campus Ceres
-2025,Computer on the Beach,Participante,Evento,Itajaí - SC
+2025,9° Ada Lovelace Day,Organização,Evento,IF Goiano - Campus Ceres
+2025,9° Aniversário do Meninas Digitais no Cerrado,Organização,Evento, IF Goiano - Campus Ceres
+2025,XVI Computer on the Beach,Participante,Evento,Itajaí - SC
 2025,Acolhimento de Calouras,Organização,Evento,IF Goiano - Campus Ceres
-2025,Encontro de Mulheres e Meninas nas Ciências,Participante,Oficina,IF Goiano - Campus Iporá
+2025,I Encontro de Mulheres e Meninas nas Ciências,Participante,Oficina,IF Goiano - Campus Iporá
 2025,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Participante,Oficina,CEPI Raimundo Santana Amaral (CEPIRSA) (Goianésia - GO)
 2025,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Participante,Oficina,Colégio Estadual Laurentino Martins (Goianésia - GO)
-2024,Escola Regional de Informática de Goiás (ERIGO),Participante,Publicação,IF Goiano - Campus Ceres,https://sol.sbc.org.br/index.php/erigo/article/view/32236/32036
-2024,Escola Regional de Informática de Goiás (ERIGO),Participante,Publicação,IF Goiano - Campus Ceres,https://sol.sbc.org.br/index.php/erigo/article/view/32245
+2024,XII Escola Regional de Informática de Goiás (ERIGO),Participante,Publicação,IF Goiano - Campus Ceres,https://sol.sbc.org.br/index.php/erigo/article/view/32236/32036
+2024,XII Escola Regional de Informática de Goiás (ERIGO),Participante,Publicação,IF Goiano - Campus Ceres,https://sol.sbc.org.br/index.php/erigo/article/view/32245
 2024,Ada Lovelace Day,Organização,Evento,IF Goiano - Campus Ceres
 2024,Conferência Internacional Hands-on Science (HSCI),Participante,Evento,Pirenópolis - GO
 2024,Competição Feminina da OBI (CF-OBI),Organização,Evento,IF Goiano - Campus Ceres
@@ -111,4 +112,4 @@ ano,nome,funcao,tipo_atividade,local,link
 2019,Mostra Científica da III Semana Acadêmica,Participante,Publicação,IF Goiano - Campus Ceres
 2019,Copa do Mundo de Futebol Feminino,Organização,Evento,IF Goiano - Campus Ceres
 2019,Seminário Interno de Iniciação Científica (SIIC),Participante,Publicação,IF Goiano - Campus Ceres
-2019,Women in Information Technology (WIT),Participante,Publicação,Belém - PA,https://doi.org/10.5753/wit.2019.6714
+2019,XXXIX Women in Information Technology (WIT),Participante,Publicação,Belém - PA,https://doi.org/10.5753/wit.2019.6714

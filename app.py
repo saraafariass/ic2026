@@ -414,7 +414,7 @@ with tab_est:
             if vert_val == "Sim":
                 badges_html += ' <span class="badge badge-vert">Verticalizou</span>'
 
-            label = f"{aluna['nome']} - {aluna['curso']}: {aluna['periodo']}"
+            label = f"{aluna['nome']} ({aluna['curso']}: {aluna['periodo']})"
             
             # Verificar se é a Thalia para mostrar separação por papel
             nome_base = _nome_base(aluna['nome'])
@@ -801,25 +801,41 @@ with tab_projetos:
         if len(projetos_tipo) > 0:
             st.subheader(tipo_projeto)
             for _, projeto in projetos_tipo.iterrows():
-                label = f"{projeto['nome']} - {projeto['periodo']}"
+                # Montar o ano de execução em parênteses
+                ano_ini = projeto['ano_ini']
+                ano_fim = projeto.get('ano_fim')
+                if pd.isna(ano_fim) or ano_fim == ano_ini:
+                    ano_execucao = f"({ano_ini})"
+                else:
+                    ano_execucao = f"({ano_ini} - {ano_fim})"
+                label = f"{projeto['nome']} {ano_execucao}"
+                
+                
                 with st.expander(label):
+                    # Exibe informações básicas
                     st.markdown(f"""
                     <div style="font-size:0.85rem; line-height:1.6;">
                         <strong>Equipe:</strong> {projeto.get('equipe', 'Não informado')}<br>
                         <strong>Período:</strong> {projeto['periodo']}<br>
-                        <strong>Detalhes:</strong>
-                        <div style="background:#fafafa; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem; white-space:pre-wrap;">
-                            {projeto.get('detalhes', '')}
-                        </div>
-                        <details style="margin-top:0.8rem;">
-                            <summary style="cursor:pointer; color:{COR_VERMELHO}; font-weight:600;">Ver resumo</summary>
-                            <div style="background:#f5f5f5; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem;">
-                                {projeto.get('resumo', '')}
-                            </div>
-                        </details>
+                        <strong>Detalhes:</strong> {projeto.get('detalhes', '')}
                     </div>
                     """, unsafe_allow_html=True)
 
+                    # Resumo em details separado
+                    resumo = projeto.get('resumo', '')
+                    if resumo:
+                        st.markdown(f"""
+                        <details style="margin-top:0.5rem;">
+                            <summary style="cursor:pointer; color:{COR_VERMELHO}; font-weight:600;">Ver resumo</summary>
+                            <div style="background:#f5f5f5; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem;">
+                                {resumo}
+                            </div>
+                        </details>
+                        """, unsafe_allow_html=True)
+    st.markdown(
+        f'<p class="fonte-site" style="margin-top: 1.5rem;">Fonte: <a href="https://meninasdigitaisnocerrado.com.br/projetos" target="_blank">meninasdigitaisnocerrado.com.br/projetos</a></p>',
+        unsafe_allow_html=True
+    )
     st.markdown("---")
     secao("Nuvem de palavras (baseada nos resumos dos projetos")
 
