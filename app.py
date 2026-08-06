@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud
+
 
 from assets.styles import (
     get_css, COR_VERMELHO, COR_VERMELHO_GRAFICO,
@@ -822,40 +821,60 @@ with tab_projetos:
                     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    secao("Nuvem de palavras (baseada nos resumos dos projetos)")
+    secao("Nuvem de palavras – baseada nos resumos dos projetos")
 
     if not projetos_periodo.empty:
         textos = projetos_periodo['resumo'].dropna().astype(str).tolist()
         if textos:
             texto_completo = ' '.join(textos)
             
-            # Stopwords em português
-            stopwords = set([
-                'de', 'da', 'do', 'e', 'para', 'com', 'em', 'uma', 'os', 'as', 'que', 'na', 'no', 'por', 'se',
-                'é', 'ao', 'aos', 'das', 'dos', 'como', 'mais', 'entre', 'são', 'ser', 'ter', 'seu', 'sua',
-                'foi', 'foram', 'vai', 'pode', 'também', 'mas', 'ou', 'quando', 'onde', 'já', 'não', 'sim',
-                'este', 'esta', 'isso', 'aquele', 'aquela', 'estes', 'estas', 'esses', 'essas', 'à', 'às',
-                'esse', 'essa', 'eles', 'elas', 'meu', 'minha', 'teu', 'tua', 'nosso', 'nossa', 'vosso', 'vossa',
-                'me', 'te', 'nos', 'vos', 'lhe', 'lhes', 'o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas',
-                'pelo', 'pela', 'pelos', 'pelas', 'ao', 'aos', 'à', 'às', 'no', 'nos', 'na', 'nas',
-                'sobre', 'entre', 'até', 'desde', 'sem', 'contra', 'por', 'perante', 'após', 'sob', 'durante',
-                'cerca', 'conforme', 'exceto', 'mediante', 'salvo', 'segundo', 'tirante', 'visto'
-            ])
+            # Tenta importar e gerar a nuvem
+            try:
+                import matplotlib.pyplot as plt
+                from wordcloud import WordCloud
 
-            wordcloud = WordCloud(
-                width=800,
-                height=400,
-                background_color='white',
-                stopwords=stopwords,
-                max_words=80,
-                colormap='Reds',
-                collocations=False
-            ).generate(texto_completo)
+                stopwords = set([
+                    'de', 'da', 'do', 'e', 'para', 'com', 'em', 'uma', 'os', 'as', 'que', 'na', 'no', 'por', 'se',
+                    'é', 'ao', 'aos', 'das', 'dos', 'como', 'mais', 'entre', 'são', 'ser', 'ter', 'seu', 'sua',
+                    'foi', 'foram', 'vai', 'pode', 'também', 'mas', 'ou', 'quando', 'onde', 'já', 'não', 'sim',
+                    'este', 'esta', 'isso', 'aquele', 'aquela', 'estes', 'estas', 'esses', 'essas', 'à', 'às',
+                    'esse', 'essa', 'eles', 'elas', 'meu', 'minha', 'teu', 'tua', 'nosso', 'nossa', 'vosso', 'vossa',
+                    'me', 'te', 'nos', 'vos', 'lhe', 'lhes', 'o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas',
+                    'pelo', 'pela', 'pelos', 'pelas', 'ao', 'aos', 'à', 'às', 'no', 'nos', 'na', 'nas',
+                    'sobre', 'entre', 'até', 'desde', 'sem', 'contra', 'por', 'perante', 'após', 'sob', 'durante',
+                    'cerca', 'conforme', 'exceto', 'mediante', 'salvo', 'segundo', 'tirante', 'visto'
+                ])
 
-            fig, ax = plt.subplots(figsize=(10, 5))
-            ax.imshow(wordcloud, interpolation='bilinear')
-            ax.axis('off')
-            st.pyplot(fig)
+                wordcloud = WordCloud(
+                    width=800,
+                    height=400,
+                    background_color='white',
+                    stopwords=stopwords,
+                    max_words=80,
+                    colormap='Reds',
+                    collocations=False
+                ).generate(texto_completo)
+
+                fig, ax = plt.subplots(figsize=(10, 5))
+                ax.imshow(wordcloud, interpolation='bilinear')
+                ax.axis('off')
+                st.pyplot(fig)
+
+            except ImportError:
+                st.warning("Bibliotecas 'wordcloud' e/ou 'matplotlib' não instaladas. Para gerar a nuvem, instale com `pip install wordcloud matplotlib`.")
+                # Fallback: tabela com palavras mais frequentes
+                from collections import Counter
+                import re
+                palavras = re.findall(r'\b[a-zA-Záéíóúâêîôûãõç]+\b', texto_completo.lower())
+                stopwords_pt = set([
+                    'de', 'da', 'do', 'e', 'para', 'com', 'em', 'uma', 'os', 'as', 'que', 'na', 'no', 'por', 'se',
+                    'é', 'ao', 'aos', 'das', 'dos', 'como', 'mais', 'entre', 'são', 'ser', 'ter', 'seu', 'sua',
+                    'foi', 'foram', 'vai', 'pode', 'também', 'mas', 'ou', 'quando', 'onde', 'já', 'não', 'sim'
+                ])
+                palavras_filtradas = [p for p in palavras if p not in stopwords_pt and len(p) > 2]
+                contagem = Counter(palavras_filtradas).most_common(20)
+                df_palavras = pd.DataFrame(contagem, columns=['Palavra', 'Frequência'])
+                st.dataframe(df_palavras, use_container_width=True)
         else:
             st.info("Nenhum resumo disponível para gerar a nuvem.")
     else:
