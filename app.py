@@ -108,13 +108,15 @@ def nome_sem_prefixos(nome):
     nome = re.sub(r'\s*\(.*?\)', '', nome).strip()
     return nome.lower()
 
-# Pega apenas o primeiro nome e o primeiro sobrenome para busca
 def nome_para_busca(nome):
     nome = re.sub(r'^Prof[ao]?\.\s*', '', nome.strip())
     nome = re.sub(r'\s*\(.*?\)', '', nome).strip()
     partes = nome.split()
-    if len(partes) >= 2:
-        return (partes[0] + ' ' + partes[1]).lower()
+    # Se tiver 3 ou mais nomes (ex: Maria Luiza Silva), usa os 3 primeiros
+    if len(partes) >= 3:
+        return ' '.join(partes[:3]).lower()
+    elif len(partes) == 2:
+        return ' '.join(partes[:2]).lower()
     return nome.lower()
 
 # Verifica se a pessoa é aluna e separa projetos/publicações por papel (aluna ou professora)
