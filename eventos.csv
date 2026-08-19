@@ -4,112 +4,108 @@ ano,nome,funcao,tipo_atividade,local,link
 # Organização: Atuação na organização e promoção do evento.
 # Participante: Apresentação de trabalhos, publicação de artigos, palestras dadas ou condução de oficinas.
 # Ouvinte: Presença no evento para assistir às apresentações e palestras.
-2026,XX Women in Information Technology (WIT),Participante,Publicação,Gramado - RS,https://sol.sbc.org.br/index.php/wit/article/view/43390/43154
-2026,OBI das Meninas,Organização,Oficina,IF Goiano - Campus Ceres
-2026,Pint of Science,Participante,Palestra,Caseirinhos de Cada Dia (Ceres - GO)
-2026,II Encontro de Mulheres e Meninas nas Ciências,Organização,Evento,IF Goiano - Campus Ceres
-2026,Acolhimento de Calouras,Organização,Evento,IF Goiano - Campus Ceres
-2025,Feira de Ciência e Tecnologia,Organização,Oficina,IF Goiano - Campus Ceres
-2025,Escola Regional de Informática de Goiás (ERIGO),Participante,Publicação,Escola SESI/SENAI (Luziânia - GO),https://sol.sbc.org.br/index.php/erigo/article/view/39524
-2025,VII Integra IF Goiano,Participante,Publicação,IF Goiano - Campus Rio Verde,https://eventos.ifgoiano.edu.br/media/arquivos/ANAIS_2025_XIV_CPPG_compressed.pdf#page=1229
-2025,XVII Congresso Latino-Americano de Mulheres na Computação (LAWCC),Participante,Publicação,Pontificia Universidad Católica de Valparaíso (PUCV) - Chile,https://ceur-ws.org/Vol-4185/paper3.pdf
-2025,XIX Women in Information Technology (WIT),Participante,Evento,Maceió - AL
-2025,5ª Simpósio Brasileiro de Educação em Computação (EduComp),Participante,Oficina,Juiz de Fora - MG
-2025,International Women's Day (IWD Cerrado),Ouvinte,Evento,Goiânia - GO
-2025,Capacitação "Do Circuito ao Código",Organização,Oficina,IF Goiano - Campus Ceres
-2025,Estratégia de Comunicação Científica no Instagram,Participante,Palestra,Online
-2025,9° Ada Lovelace Day,Organização,Evento,IF Goiano - Campus Ceres
-2025,9° Aniversário do Meninas Digitais no Cerrado,Organização,Evento, IF Goiano - Campus Ceres
-2025,XVI Computer on the Beach,Participante,Evento,Itajaí - SC
-2025,Acolhimento de Calouras,Organização,Evento,IF Goiano - Campus Ceres
-2025,I Encontro de Mulheres e Meninas nas Ciências,Participante,Oficina,IF Goiano - Campus Iporá
-2025,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Participante,Oficina,CEPI Raimundo Santana Amaral (CEPIRSA) (Goianésia - GO)
-2025,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Participante,Oficina,Colégio Estadual Laurentino Martins (Goianésia - GO)
-2024,XII Escola Regional de Informática de Goiás (ERIGO),Participante,Publicação,IF Goiano - Campus Ceres,https://sol.sbc.org.br/index.php/erigo/article/view/32236/32036
-2024,XII Escola Regional de Informática de Goiás (ERIGO),Participante,Publicação,IF Goiano - Campus Ceres,https://sol.sbc.org.br/index.php/erigo/article/view/32245
-2024,Ada Lovelace Day,Organização,Evento,IF Goiano - Campus Ceres
-2024,Conferência Internacional Hands-on Science (HSCI),Participante,Evento,Pirenópolis - GO
-2024,Competição Feminina da OBI (CF-OBI),Organização,Evento,IF Goiano - Campus Ceres
-2024,Aniversário do Meninas Digitais no Cerrado,Organização,Evento,IF Goiano - Campus Ceres
-2024,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Organização,Oficina,IF Goiano - Campus Ceres
-2024,Maratona SBC de Programação,Participante,Evento,Universidade Federal de Goiás (UFG)
-2024,Women in Information Technology (WIT),Participante,Publicação,Brasília -DF,https://sol.sbc.org.br/index.php/wit/article/view/29559
-2024,International Women's Day (IWD Cerrado),Ouvinte,Evento,Goiânia - GO
-2024,Cine Pipoca com o filme Barbie,Organização,Palestra,IF Goiano - Campus Ceres
-2024,Campus Party Brasília,Participante,Palestra,Brasília - DF
-2024,Acolhimento de Calouras,Organização,Evento,IF Goiano - Campus Ceres
-2024,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Organização,Oficina,IF Goiano - Campus Ceres
-2024,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Organização,Oficina,IF Goiano - Campus Ceres
-2023,Defesa da dissertação intitulada “Meninas Digitais no Cerrado: um estudo de caso sobre um projeto de empoderamento feminino na Computação do IF Goiano – Campus Ceres,Participante,Publicação,IF Goiano - Campus Ceres,https://repositorio.ifgoiano.edu.br/handle/prefix/4141
-2023,Workshop de Robótica para Meninas,Organização,Oficina,IF Goiano - Campus Ceres
-2023,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Organização,Oficina,Escola Estadual Pedro Mendonça (Goianésia - GO)
-2023,Congresso Latino-Americano de Mulheres na Computação (LAWCC),Participante,Publicação,Universidad Mayor de San Andrés (UMSA) - La Paz (Bolívia),https://ceur-ws.org/Vol-3607/paper18.pdf
-2023,Ada Lovelace Day,Organização,Evento,IF Goiano - Campus Ceres
-2023,Integra IF Goiano,Participante,Publicação,IF Goiano - Campus Trindade,https://repositorio.ifgoiano.edu.br/bitstream/prefix/5161/1/e-book_Anais%20do%20V%20Integra%20IF%20Goiano%3A%20Inclus%C3%A3o%20e%20Sustentabilidade.pdf
-2023,Aniversário do Meninas Digitais no Cerrado,Organização,Evento,IF Goiano - Campus Ceres
-2023,Women in Information Technology (WIT),Participante,Evento,João Pessoa - PB
-2023,Copa do Mundo de Futebol Feminino,Organização,Evento,IF Goiano - Campus Ceres
-2023,Seminário Interno de Iniciação Científica (SIIC),Participante,Publicação,IF Goiano - Campus Ceres
-2023,Encontro Anual de Tecnologia da Informação do Oeste Goiano (ENATI),Participante,Oficina,IF Goiano - Campus Iporá
-2023,Campus Party Goiás,Participante,Palestra,Goiânia - GO
-2023,Acolhimento de Calouras,Organização,Evento,IF Goiano - Campus Ceres
-2023,Campus Party Brasília,Participante,Oficina,Brasília - DF
-2023,Ação "Procura-se Cientistas",Organização,Evento,IF Goiano - Campus Ceres
-2023,Presença no Baú da Ciência,Organização,Oficina,IF Goiano - Campus Ceres
-2022,Semana Nacional de Ciência e Tecnologia,Participante,Oficina,Brasília - DF
-2022,Encerramento do projeto de ensino "Fada Madrinha",Organização,Evento,IF Goiano - Campus Ceres
-2022,Ada Lovelace Day,Organização,Evento,IF Goiano - Campus Ceres
-2022,Ação do projeto de ensino "Fada Madrinha",Organização,Evento,IF Goiano - Campus Ceres
-2022,Cine Debate,Organização,Evento,IF Goiano - Campus Ceres
-2022,Mulheres in Tech,Participante,Palestra,Instituto de Informática (UFG)
-2022,Por que discutir feminismo no IF Goiano – Campus Ceres?,Participante,Palestra,Online
-2022,Mesa Redonda "Fala,Mulher!",Participante,Palestra,Online
-2022,Computer on the Beach,Participante,Publicação,Itajaí - SC,https://periodicos.univali.br/index.php/acotb/article/view/18841
-2022,Acolhimento de Calouras,Organização,Evento,IF Goiano - Campus Ceres
-2022,Seminário Interno de Iniciação Científica (SIIC),Participante,Publicação,IF Goiano - Campus Ceres
-2022,Campus Party Goiás,Participante,Palestra,Goiânia - GO
-2022,Women in Information Technology (WIT),Participante,Publicação,Niterói - RJ,https://sol.sbc.org.br/index.php/wit/article/view/20859
-2022,Ada Lovelace Day,Organização,Evento,IF Goiano - Campus Ceres
-2021,Café com Ciência,Participante,Palestra,Online
-2021,A força das meninas nas exatas,Participante,Palestra,Online
-2021,Live #11 do Metabotix,Participante,Palestra,Online
-2021,Computer on the Beach,Participante,Palestra,Online
-2021,Computer on the Beach,Participante,Publicação,Online,https://periodicos.univali.br/index.php/acotb/article/view/17484
-2021,A carreira e a escolha profissional,Participante,Palestra,Online
-2022,Acolhimento de Calouras,Organização,Evento,Online
-2021,Encontro de Licenciaturas e Pesquisa em Educação do IF Goiano,Participante,Publicação,Online,https://suap.ifgoiano.edu.br/media/documentos/arquivos/ELPED_-_VERSAO_FINAL_PUBLICACAO.pdf
-2021,Women in Information Technology (WIT),Participante,Publicação,Online,https://sol.sbc.org.br/index.php/wit/article/view/15862
-2021,Campus Party Goiás,Participante,Palestra,Online
-2021,Ada Lovelace Day,Organização,Evento,Online
-2021,As relações de gênero na Computação,Participante,Palestra,Online
-2021,Feira de Ciência e Tecnologia,Participante,Palestra,Online
-2021,Congresso Latino-Americano de Mulheres na Computação (LAWCC),Online,https://ceur-ws.org/Vol-3000/paper195.pdf
-2021,Workshop ADAs,Participante,Palestra,Online
-2021,Lives #ComunidadeMDC,Organização,Palestra,Online
-2021,Simpósio Brasileiro de Informática na Educação (SBIE),Participante,Publicação,https://sol.sbc.org.br/index.php/sbie/article/view/18154
-2020,Acolhimento de Calouras,Organização,Evento,IF Goiano - Campus Ceres
-2020,Ação em comemoração Dia das Mulheres e Meninas na Ciência,Participante,Palestra,IF Goiano - Campus Ceres
-2020,Semana de Luta das Mulheres,Participante,Oficina,IF Goiano - Campus Ceres
-2020,#MDCEEMCASA,Organização,Palestra,Online
-2020,Curso Online de Canva,Organização,Oficina,Online
-2020,Campus Party Goiás,Participante,Palestra,Online
-2020,#AmeliasEmCasa,Participante,Palestra,Online
-2020,Ada Lovelace Day,Organização,Evento,Online
-2020,Semana Nacional de Ciência e Tecnologia,Participante,Palestra,Online
-2020,Seminário Interno de Iniciação Científica (SIIC),Participante,Publicação,IF Goiano - Campus Ceres
-2020,Women in Information Technology (WIT),Participante,Palestra,Online
-2020,Women in Information Technology (WIT),Participante,Publicação,Online,https://sol.sbc.org.br/index.php/wit/article/view/11304/11167
-2020,Women in Information Technology (WIT),Participante,Publicação,Online,https://sol.sbc.org.br/index.php/wit/article/view/11310/11173
-2020,LatinoWare,Participante,Oficina,Online
-2020,Feira de Ciência e Tecnologia,Participante,Palestra,Online
-2020,Live das Meninas Cientistas IFG,Participante,Palestra,Online
-2019,Acolhimento de Calouras,Organização,Evento,IF Goiano - Campus Ceres
-2019,Women Techmakers,Participante,Viagem Técnica,Goiânia - GO
-2019,Colóquio da LAAD sobre o Dia da Mulher,Participante,Palestra
-2019,Computer on the Beach,Participante,Publicação,Itajaí - SC,https://siaiap32.univali.br/seer/index.php/acotb/article/view/14454
-2019,IntegraTec,Participante,Oficina,IF Goiano - Campus Ceres
-2019,IntegraTec,Participante,Oficina,IF Goiano - Campus Ceres
-2019,Mostra Científica da III Semana Acadêmica,Participante,Publicação,IF Goiano - Campus Ceres
-2019,Copa do Mundo de Futebol Feminino,Organização,Evento,IF Goiano - Campus Ceres
-2019,Seminário Interno de Iniciação Científica (SIIC),Participante,Publicação,IF Goiano - Campus Ceres
-2019,XXXIX Women in Information Technology (WIT),Participante,Publicação,Belém - PA,https://doi.org/10.5753/wit.2019.6714
+
+2026,XX Women in Information Technology (WIT),Participante,Divulgação Científica,Gramado - RS,https://sol.sbc.org.br/index.php/wit/article/view/43390/43154
+2026,OBI das Meninas,Organização,Capacitação Tecnológica,IF Goiano - Campus Ceres,
+2026,Pint of Science,Participante,Construção humana,Caseirinhos de Cada Dia (Ceres - GO),
+2026,II Encontro de Mulheres e Meninas nas Ciências,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2026,Acolhimento de Calouras,Organização,Construção humana,IF Goiano - Campus Ceres,
+2025,XXVI Feira de Ciência e Tecnologia,Organização,Capacitação Tecnológica,IF Goiano - Campus Ceres,
+2025,13ª Escola Regional de Informática de Goiás (ERIGO),Participante,Divulgação Científica,Escola SESI/SENAI (Luziânia - GO),https://sol.sbc.org.br/index.php/erigo/article/view/39524
+2025,VII Integra IF Goiano,Participante,Divulgação Científica,IF Goiano - Campus Rio Verde,https://eventos.ifgoiano.edu.br/media/arquivos/ANAIS_2025_XIV_CPPG_compressed.pdf#page=1229
+2025,XVII Congresso Latino-Americano de Mulheres na Computação (LAWCC),Participante,Divulgação Científica,Pontificia Universidad Católica de Valparaíso (PUCV) - Chile,https://ceur-ws.org/Vol-4185/paper3.pdf
+2025,XIX Women in Information Technology (WIT),Participante,Representação e ampliação de alcance,Maceió - AL,
+2025,5ª Simpósio Brasileiro de Educação em Computação (EduComp),Participante,Capacitação Tecnológica,Juiz de Fora - MG,
+2025,International Women's Day (IWD Cerrado),Ouvinte,Viagem Técnica,Goiânia - GO,
+2025,Capacitação "Do Circuito ao Código",Organização,Capacitação Tecnológica,IF Goiano - Campus Ceres,
+2025,Estratégia de Comunicação Científica no Instagram,Participante,Capacitação Tecnológica,Online,
+2025,IX Ada Lovelace Day,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2025,9º Aniversário do Meninas Digitais no Cerrado,Organização,Promoção de eventos, IF Goiano - Campus Ceres,
+2025,XVI Computer on the Beach,Participante,Representação e ampliação de alcance,Itajaí - SC,
+2025,Acolhimento de Calouras,Organização,Construção humana,IF Goiano - Campus Ceres,
+2025,I Encontro de Mulheres e Meninas nas Ciências,Participante,Divulgação Científica,IF Goiano - Campus Iporá,
+2025,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Participante,Construção humana,CEPI Raimundo Santana Amaral (CEPIRSA) (Goianésia - GO),
+2025,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Participante,Construção humana,Colégio Estadual Laurentino Martins (Goianésia - GO),
+2024,XII Escola Regional de Informática de Goiás (ERIGO),Participante,Divulgação Científica,IF Goiano - Campus Ceres,https://sol.sbc.org.br/index.php/erigo/article/view/32236/32036;https://sol.sbc.org.br/index.php/erigo/article/view/32245
+2024,VIII Ada Lovelace Day,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2024,Conferência Internacional Hands-on Science (HSCI),Participante,Divulgação Científica,Pirenópolis - GO,
+2024,Competição Feminina da OBI (CF-OBI),Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2024,8º Aniversário do Meninas Digitais no Cerrado,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2024,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Organização,Construção humana,IF Goiano - Campus Ceres,
+2024,Maratona SBC de Programação,Participante,Capacitação Tecnológica,Universidade Federal de Goiás (UFG),
+2024,Women in Information Technology (WIT),Participante,Divulgação Científica,Brasília -DF,https://sol.sbc.org.br/index.php/wit/article/view/29559
+2024,International Women's Day (IWD Cerrado),Ouvinte,Viagem Técnica,Goiânia - GO,
+2024,Cine Pipoca com o filme Barbie,Organização,Construção humana,IF Goiano - Campus Ceres,
+2024,Campus Party Brasília,Participante,Construção humana,Brasília - DF,
+2024,Acolhimento de Calouras,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2024,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Organização,Construção humana,IF Goiano - Campus Ceres,
+2024,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Organização,Construção humana,IF Goiano - Campus Ceres,
+2023,Defesa da dissertação intitulada “Meninas Digitais no Cerrado: um estudo de caso sobre um projeto de empoderamento feminino na Computação do IF Goiano - Campus Ceres,Participante,Divulgação Científica,IF Goiano - Campus Ceres,https://repositorio.ifgoiano.edu.br/handle/prefix/4141
+2023,Workshop de Robótica para Meninas,Organização,Capacitação Tecnológica,IF Goiano - Campus Ceres
+2023,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Organização,Construção humana,Escola Estadual Pedro Mendonça (Goianésia - GO),
+2023,Congresso Latino-Americano de Mulheres na Computação (LAWCC),Participante,Divulgação Científica,Universidad Mayor de San Andrés (UMSA) - La Paz (Bolívia),https://ceur-ws.org/Vol-3607/paper18.pdf
+2023,VII Ada Lovelace Day,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2023,V Integra IF Goiano,Participante,Divulgação Científica,IF Goiano - Campus Trindade,https://repositorio.ifgoiano.edu.br/bitstream/prefix/5161/1/e-book_Anais%20do%20V%20Integra%20IF%20Goiano%3A%20Inclus%C3%A3o%20e%20Sustentabilidade.pdf
+2023,7º Aniversário do Meninas Digitais no Cerrado,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2023,XVII Women in Information Technology (WIT),Participante,Representação e ampliação de alcance,João Pessoa - PB
+2023,Copa do Mundo de Futebol Feminino,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2023,XII Seminário Interno de Iniciação Científica (SIIC),Participante,Divulgação Científica,IF Goiano - Campus Ceres,
+2023,IX Encontro Anual de Tecnologia da Informação do Oeste Goiano (ENATI),Participante,Construção humana,IF Goiano - Campus Iporá,
+2023,Campus Party Goiás,Participante,Capacitação Tecnológica,Goiânia - GO,
+2023,Acolhimento de Calouras,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2023,Campus Party Brasília,Participante,Capacitação Tecnológica,Brasília - DF,
+2023,Ação "Procura-se Cientistas",Organização,Representação e ampliação de alcance,IF Goiano - Campus Ceres,
+2023,Presença no Baú da Ciência,Organização,Representação e ampliação de alcance,IF Goiano - Campus Ceres,
+2022,XVIII Semana Nacional de Ciência e Tecnologia,Participante,Representação e ampliação de alcance,Brasília - DF,
+2022,Encerramento do projeto de ensino "Fada Madrinha",Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2022,VI Ada Lovelace Day,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2022,Ação do projeto de ensino "Fada Madrinha",Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2022,Cine Debate: filme "Coração de fogo",Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2022,Mulheres in Tech,Participante,Construção humana,Instituto de Informática (UFG),
+2022,Por que discutir feminismo no IF Goiano - Campus Ceres?,Participante,Construção humana,Online,
+2022,"Mesa Redonda ""Fala,Mulher!""",Participante,Construção humana,Online,
+2022,XIII Computer on the Beach,Participante,Divulgação Científica,Itajaí - SC,https://periodicos.univali.br/index.php/acotb/article/view/18841
+2022,Acolhimento de Calouras,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2022,XI Seminário Interno de Iniciação Científica (SIIC),Participante,Divulgação Científica,IF Goiano - Campus Ceres,
+2022,Campus Party Goiás,Participante,Capacitação Tecnológica,Goiânia - GO,
+2022,XVI Women in Information Technology (WIT),Participante,Divulgação Científica,Niterói - RJ,https://sol.sbc.org.br/index.php/wit/article/view/20859
+2021,Episódio 01 do Café com Ciência,Participante,Construção humana,Online,
+2021,A força das meninas nas exatas - Programação do Mês da Mulher do IF Goiano,Participante,Construção humana,Online,
+2021,Live #11 do Metabotix,Participante,Construção humana,Online,
+2021,XIII Computer on the Beach,Participante,Divulgação Científica,Online,https://periodicos.univali.br/index.php/acotb/article/view/17484
+2021,A carreira e a escolha profissional (Tutor UTFPR),Participante,Construção humana,Online,
+2022,Acolhimento de Calouras,Organização,Promoção de eventos,Online,
+2021,IV Encontro de Licenciaturas e Pesquisa em Educação do IF Goiano,Participante,Divulgação Científica,Online,https://suap.ifgoiano.edu.br/media/documentos/arquivos/ELPED_-_VERSAO_FINAL_PUBLICACAO.pdf
+2021,XV Women in Information Technology (WIT),Participante,Divulgação Científica,Online,https://sol.sbc.org.br/index.php/wit/article/view/15862
+2021,Campus Party Goiás,Participante,Construção humana,Online,
+2021,V Ada Lovelace Day,Organização,Promoção de eventos,Online,
+2021,As relações de gênero na Computação (INF Conectado),Participante,Construção humana,Online,
+2021,XII Feira de Ciência e Tecnologia,Participante,Construção humana,Online,
+2021,XVIII Congresso Latino-Americano de Mulheres na Computação (LAWCC),Participante,Divulgação Científica,Online,https://ceur-ws.org/Vol-3000/paper195.pdf
+2021,IV Workshop ADAs,Participante,Capacitação Tecnológica,Online,
+2021,Lives #ComunidadeMDC,Organização,Promoção de eventos,Online,
+2021,XXXII Simpósio Brasileiro de Informática na Educação (SBIE),Participante,Divulgação Científica,Online,https://sol.sbc.org.br/index.php/sbie/article/view/18154
+2020,Acolhimento de Calouras,Organização,Promoção de eventos,IF Goiano - Campus Ceres
+2020,Ação em comemoração Dia das Mulheres e Meninas na Ciência,Participante,Construção humana,IF Goiano - Campus Ceres,
+2020,Semana de Luta das Mulheres,Participante,Construção humana,IF Goiano - Campus Ceres,
+2020,#MDCEEMCASA,Organização,Construção humana,Online,
+2020,Curso Online de Canva,Organização,Capacitação Tecnológica,Online,
+2020,Campus Party Goiás,Participante,Construção humana,Online,
+2020,#AmeliasEmCasa,Participante,Construção humana,Online,
+2020,IV Ada Lovelace Day,Organização,Promoção de eventos,Online,
+2020,XVII Semana Nacional de Ciência e Tecnologia,Participante,Construção humana,Online,
+2020,IX Seminário Interno de Iniciação Científica (SIIC),Participante,Divulgação Científica,IF Goiano - Campus Ceres,
+2020,XIV Women in Information Technology (WIT),Participante,Divulgação Científica,Online,https://sol.sbc.org.br/index.php/wit/article/view/11304/11167;https://sol.sbc.org.br/index.php/wit/article/view/11310/11173
+2020,XVII LatinoWare,Participante,Capacitação Tecnológica,Online,
+2020,XXI Feira de Ciência e Tecnologia,Participante,Construção humana,Online,
+2020,Live das Meninas Cientistas IFG,Participante,Construção humana,Online,
+2019,Acolhimento de Calouras,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2019,Women Techmakers,Participante,Viagem Técnica,Goiânia - GO,
+2019,I Colóquio da LAAD sobre o Dia da Mulher,Participante,Construção humana,Goiânia - GO
+2019,9º Computer on the Beach,Participante,Divulgação Científica,Itajaí - SC,https://siaiap32.univali.br/seer/index.php/acotb/article/view/14454
+2019,III IntegraTec,Participante,Capacitação Tecnológica,IF Goiano - Campus Ceres,
+2019,Mostra Científica da III Semana Acadêmica,Participante,Divulgação Científica,IF Goiano - Campus Ceres,
+2019,Copa do Mundo de Futebol Feminino,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
+2019,VIII Seminário Interno de Iniciação Científica (SIIC),Participante,Divulgação Científica,IF Goiano - Campus Ceres,
+2019,XIII Women in Information Technology (WIT),Participante,Divulgação Científica,Belém - PA,https://doi.org/10.5753/wit.2019.6714
+2019,III Ada Lovelace Day,Organização,Promoção de eventos,IF Goiano - Campus Ceres,

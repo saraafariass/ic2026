@@ -1,126 +1,131 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
-
+import re
 
 from assets.styles import (
-    get_css, COR_VERMELHO, COR_VERMELHO_GRAFICO,
-    TEXTO, TEXTO_SECUNDARIO, TEXTO_TERCIARIO, FUNDO, CARD, TIPO_COR, EVENTO_TIPO_COR
+    vermelho, vermelho_claro, cor_texto, cor_texto_secundario,
+    cor_texto_terciario, fundo, fundo_card, cores_projetos, cores_eventos
 )
 
-st.set_page_config(layout="wide", page_title="  Dashboard MDC")
-st.markdown(get_css(), unsafe_allow_html=True)
+# Configura a página para ocupar a tela toda e define o título
+st.set_page_config(layout="wide", page_title="Dashboard MDC")
 
+# ============================================================
+# 1. CARREGAR O CSS (estilos) do arquivo externo
+# ============================================================
+def carregar_css():
+    with open("assets/style.css", "r", encoding="utf-8") as arquivo:
+        return arquivo.read()
 
+st.markdown(f"<style>{carregar_css()}</style>", unsafe_allow_html=True)
+
+# ============================================================
+# 2. FUNÇÕES AUXILIARES (para não repetir código)
+# ============================================================
+
+# Cria um título de seção
 def secao(titulo):
     st.markdown(f'<p class="secao">{titulo}</p>', unsafe_allow_html=True)
 
-
-def _pub_card_inner(alcance, ano, alcance_cor, ref, aut, btn):
-    """Monta HTML do card de publicação sem interpolar dados do usuário na f-string."""
-    header = (
+# Monta o HTML de um card de publicação
+def _pub_card_inner(alcance, ano, alcance_cor, referencia, autoria, botao):
+    cabecalho = (
         f'<span style="font-size:0.68rem;background:{alcance_cor};color:#fff;'
         f'padding:1px 7px;border-radius:10px;font-weight:600;">' + alcance + '</span>'
-        f'<span style="font-size:0.68rem;color:{TEXTO_TERCIARIO};"> ' + ano + '</span><br>'
+        f'<span style="font-size:0.68rem;color:{cor_texto_terciario};"> ' + ano + '</span><br>'
     )
-    body = (
-        '<span style="font-size:0.78rem;color:' + TEXTO + ';display:block;margin-top:3px;">' +
-        ref + '</span>' + btn
+    corpo = (
+        '<span style="font-size:0.78rem;color:' + cor_texto + ';display:block;margin-top:3px;">' +
+        referencia + '</span>' + botao
     )
     return (
         f'<div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;'
         f'margin-bottom:0.35rem;border-left:3px solid {alcance_cor};">'
-        + header + body + '</div>'
+        + cabecalho + corpo + '</div>'
     )
 
+# Mostra uma publicação em formato de card
+def card_publicacao(publicacao, alcance_cor, botao=''):
+    referencia = str(publicacao.get('referencia', ''))
+    alcance = str(publicacao.get('alcance', ''))
+    ano = str(publicacao.get('ano', ''))
+    st.markdown(_pub_card_inner(alcance, ano, alcance_cor, referencia, '', botao), unsafe_allow_html=True)
 
-def card_publicacao(p, alcance_cor, btn=''):
-    ref = str(p.get('referencia', ''))
-    alcance = str(p.get('alcance', ''))
-    ano = str(p.get('ano', ''))
-    st.markdown(_pub_card_inner(alcance, ano, alcance_cor, ref, '', btn), unsafe_allow_html=True)
+# Mostra uma publicação em formato de lista (com botão)
+def card_publicacao_lista(publicacao, cor_vermelho, cor_texto, cor_texto_sec):
+    referencia = str(publicacao.get('referencia', ''))
+    autoria = str(publicacao.get('autoria', 'Não informado'))
+    alcance = str(publicacao.get('alcance', ''))
+    link = str(publicacao.get('link', '')).strip()
+    tem_link = pd.notna(publicacao.get('link')) and link
 
-
-def card_publicacao_lista(pub, cor_vermelho, texto, texto_secundario):
-    ref = str(pub.get('referencia', ''))
-    aut = str(pub.get('autoria', 'Não informado'))
-    alcance = str(pub.get('alcance', ''))
-    link_pub = str(pub.get('link', '')).strip()
-    tem_link = pd.notna(pub.get('link')) and link_pub
-    btn_html = (
-        f'<a href="{link_pub}" target="_blank" style="'
+    botao_html = (
+        f'<a href="{link}" target="_blank" style="'
         f'display:inline-block;padding:5px 14px;background:{cor_vermelho};'
         f'color:#fff;border-radius:5px;font-size:0.75rem;font-weight:600;'
         f'text-decoration:none;letter-spacing:0.02em;">Acessar trabalho</a>'
     ) if tem_link else ''
+
     card_html = (
         f'<div class="card-publicacao">'
         f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">'
-        f'<span class="alcance-badge">' + alcance + '</span>' + btn_html + '</div>'
-        f'<p style="margin:0.4rem 0 0.3rem;font-weight:500;color:{texto};">' + ref + '</p>'
-        f'<small style="color:{texto_secundario};">Autoria: ' + aut + '</small>'
+        f'<span class="alcance-badge">' + alcance + '</span>' + botao_html + '</div>'
+        f'<p style="margin:0.4rem 0 0.3rem;font-weight:500;color:{cor_texto};">' + referencia + '</p>'
+        f'<small style="color:{cor_texto_sec};">Autoria: ' + autoria + '</small>'
         '</div>'
     )
     st.markdown(card_html, unsafe_allow_html=True)
 
+# Filtra projetos pelo período (ano inicial e final)
+def filtrar_periodo(df, ano_inicio, ano_fim):
+    return df[(df["ano_ini"] <= ano_fim) & (df["ano_fim"] >= ano_inicio)]
 
-def filtrar_periodo(df, ano_ini, ano_fim):
-    return df[(df["ano_ini"] <= ano_fim) & (df["ano_fim"] >= ano_ini)]
-
-
-def _parse_ano(texto):
-    """Extrai ano inicial e final de strings como '2020 - atual' ou '2022'."""
-    import re
+# Extrai ano inicial e final de textos como "2020 - atual" ou "2022"
+def extrair_anos(texto):
     texto = str(texto).strip()
     anos = re.findall(r'\d{4}', texto)
     if not anos:
         return None, None
-    ano_i = int(anos[0])
-    ano_f = 2026 if 'atual' in texto.lower() else int(anos[-1])
-    return ano_i, ano_f
+    ano_inicio = int(anos[0])
+    ano_fim = 2026 if 'atual' in texto.lower() else int(anos[-1])
+    return ano_inicio, ano_fim
 
-
-def filtrar_alunas_periodo(df, ano_ini, ano_fim):
-    def no_periodo(row):
-        a_i, a_f = _parse_ano(row['periodo'])
+# Filtra alunas que estavam ativas no período escolhido
+def filtrar_alunas_periodo(df, ano_inicio, ano_fim):
+    def esta_no_periodo(linha):
+        a_i, a_f = extrair_anos(linha['periodo'])
         if a_i is None:
             return True
-        return a_i <= ano_fim and a_f >= ano_ini
-    return df[df.apply(no_periodo, axis=1)]
+        return a_i <= ano_fim and a_f >= ano_inicio
+    return df[df.apply(esta_no_periodo, axis=1)]
 
-
-def _nome_base(nome):
-    """Remove prefixos (Profa./Prof.) e sufixos como (2016 - 2022) do nome."""
-    import re
+# Remove prefixos (Prof., Profa.) e sufixos como (2016-2022) do nome
+def nome_sem_prefixos(nome):
     nome = re.sub(r'^Prof[ao]?\.\s*', '', nome.strip())
     nome = re.sub(r'\s*\(.*?\)', '', nome).strip()
     return nome.lower()
 
-
-def _nome_busca(nome):
-    """Extrai apenas nome e primeiro sobrenome para busca flexível."""
-    import re
+# Pega apenas o primeiro nome e o primeiro sobrenome para busca
+def nome_para_busca(nome):
     nome = re.sub(r'^Prof[ao]?\.\s*', '', nome.strip())
     nome = re.sub(r'\s*\(.*?\)', '', nome).strip()
-    # Pega apenas nome e primeiro sobrenome (ex: 'Maria Isabela' de 'Maria Isabela da Silva Nunes')
     partes = nome.split()
     if len(partes) >= 2:
         return (partes[0] + ' ' + partes[1]).lower()
     return nome.lower()
 
+# Verifica se a pessoa é aluna e separa projetos/publicações por papel (aluna ou professora)
+def separar_por_papel(nome, projetos_df, publicacoes_df, alunas_df, docentes_df, ano_inicio, ano_fim):
+    busca = nome_para_busca(nome)
 
-def verificar_e_separar_resultados(nome, projetos_df, publicacoes_df, alunas_df, docentes_df, ano_ini, ano_fim):
-    """Verifica se a pessoa é aluna e separa projetos/publicações por papel."""
-    import re
-    busca = _nome_busca(nome)
-    
-    # Verificar se é aluna (no período do projeto)
+    # Verifica se é aluna no período
     eh_aluna = False
     periodo_aluna_fim = 0
     for _, aluna in alunas_df.iterrows():
         if busca in str(aluna['nome']).lower():
-            # Verificar se o período da aluna se sobrepõe ao período do filtro
             periodo = str(aluna.get('periodo', ''))
             anos = re.findall(r'\d{4}', periodo)
             if anos:
@@ -129,29 +134,24 @@ def verificar_e_separar_resultados(nome, projetos_df, publicacoes_df, alunas_df,
                     periodo_fim = 2026
                 else:
                     periodo_fim = int(anos[-1]) if len(anos) > 1 else periodo_ini
-                
-                # Se o período da aluna se sobrepõe ao filtro, é aluna
-                if periodo_fim >= ano_ini and periodo_ini <= ano_fim:
+                if periodo_fim >= ano_inicio and periodo_ini <= ano_fim:
                     eh_aluna = True
                     periodo_aluna_fim = periodo_fim
                     break
-    
-    # Verificar se é docente
+
+    # Verifica se é docente
     eh_docente = False
     for _, docente in docentes_df.iterrows():
         if busca in str(docente['nome']).lower():
             eh_docente = True
             break
-    
-    # Buscar projetos e publicações
-    projetos = encontrar_projetos_por_pessoa(nome, projetos_df)
-    publicacoes = encontrar_publicacoes_por_pessoa(nome, publicacoes_df)
-    
-    # Separar por papel
+
+    # Busca projetos e publicações da pessoa
+    projetos = buscar_projetos_por_nome(nome, projetos_df)
+    publicacoes = buscar_publicacoes_por_nome(nome, publicacoes_df)
+
+    # Se for aluna e docente, separa pelo ano
     if eh_aluna and eh_docente:
-        # Se é aluna E docente, separar projetos/publicações
-        # Projetos/publicações até o ano de término da aluna vão para "como aluna"
-        # O resto vai para "como professora"
         proj_aluna = []
         proj_docente = []
         for p in projetos:
@@ -160,7 +160,7 @@ def verificar_e_separar_resultados(nome, projetos_df, publicacoes_df, alunas_df,
                 proj_aluna.append(p)
             else:
                 proj_docente.append(p)
-        
+
         pub_aluna = []
         pub_docente = []
         for p in publicacoes:
@@ -169,30 +169,30 @@ def verificar_e_separar_resultados(nome, projetos_df, publicacoes_df, alunas_df,
                 pub_aluna.append(p)
             else:
                 pub_docente.append(p)
-        
+
         return proj_aluna, proj_docente, pub_aluna, pub_docente, True
     elif eh_aluna:
         return projetos, [], publicacoes, [], True
     else:
         return [], projetos, [], publicacoes, False
 
-
-def encontrar_projetos_por_pessoa(nome, projetos_df):
-    busca = _nome_busca(nome)
+# Encontra projetos em que a pessoa aparece na equipe ou autoria
+def buscar_projetos_por_nome(nome, projetos_df):
+    busca = nome_para_busca(nome)
     return [
         p for _, p in projetos_df.iterrows()
         if busca in str(p.get('equipe', p.get('autoria', ''))).lower()
     ]
 
-
-def encontrar_publicacoes_por_pessoa(nome, publicacoes_df):
-    busca = _nome_busca(nome)
+# Encontra publicações em que a pessoa é autora
+def buscar_publicacoes_por_nome(nome, publicacoes_df):
+    busca = nome_para_busca(nome)
     return [
         p for _, p in publicacoes_df.iterrows()
         if busca in str(p.get('autoria', '')).lower()
     ]
 
-
+# Carrega todos os dados dos arquivos CSV
 @st.cache_data
 def carregar_dados():
     alunas = pd.read_csv("alunas.csv")
@@ -202,13 +202,9 @@ def carregar_dados():
     premiacoes = pd.read_csv("premiacoes.csv")
     eventos = pd.read_csv("eventos.csv")
     parcerias = pd.read_csv("parcerias.csv")
-    # Converte coluna 'ano' para inteiro em eventos e premiações
     eventos['ano'] = pd.to_numeric(eventos['ano'], errors='coerce').astype('Int64')
     premiacoes['ano'] = pd.to_numeric(premiacoes['ano'], errors='coerce').astype('Int64')
     return alunas, docentes, projetos, publicacoes, premiacoes, eventos, parcerias
-
-
-
 
 def iniciais(nome):
     partes = nome.strip().split()
@@ -216,36 +212,30 @@ def iniciais(nome):
         return (partes[0][0] + partes[-1][0]).upper()
     return partes[0][:2].upper()
 
-
 def badge_curso(curso_str):
-    """Gera badges para múltiplos cursos separados por ';'"""
     if pd.isna(curso_str) or str(curso_str).strip() == '':
         return ''
-    
-    cursos = get_cursos_list(curso_str)
+    cursos = lista_cursos(curso_str)
     badges = []
-    
     for curso in cursos:
         curso = curso.strip()
         if "Técnico" in curso:
             badges.append('<span class="badge badge-tec">Técnico</span>')
         elif "Graduação" in curso or "Licenciatura" in curso or "Bacharelado" in curso:
             badges.append('<span class="badge badge-grad">Graduação</span>')
-    
     return ' '.join(badges)
 
-
-def get_cursos_list(curso_str):
-    """Converte string de cursos em lista, separando por ';'"""
+def lista_cursos(curso_str):
     if pd.isna(curso_str) or str(curso_str).strip() == '':
         return []
     return [c.strip() for c in str(curso_str).split(';')]
 
-
+# carregar dados
 alunas, docentes, projetos, publicacoes, premiacoes, eventos, parcerias = carregar_dados()
 
-ano_min, ano_max = 2016, 2026
+ano_minimo, ano_maximo = 2016, 2026
 
+# filtros 
 st.sidebar.markdown(
     '<p class="sidebar-titulo">Meninas Digitais no Cerrado</p>'
     '<p class="sidebar-marca">MDC - 10 anos</p>',
@@ -253,37 +243,40 @@ st.sidebar.markdown(
 )
 st.sidebar.markdown("---")
 st.sidebar.markdown('<p class="filtro-titulo">Filtrar por ano</p>', unsafe_allow_html=True)
-ano_ini, ano_fim = st.sidebar.slider(
+ano_inicio, ano_fim = st.sidebar.slider(
     "Período", 2016, 2026, (2016, 2026), label_visibility="collapsed",
 )
 
 st.sidebar.markdown('<p class="filtro-titulo">Filtrar estudantes</p>', unsafe_allow_html=True)
-
-cursos_options = ["Todos", "Técnico", "Graduação", "Técnico e Graduação"]
-filtro_curso = st.sidebar.selectbox("Curso:", cursos_options)
-
+opcoes_curso = ["Todos", "Técnico", "Graduação", "Técnico e Graduação"]
+filtro_curso = st.sidebar.selectbox("Curso:", opcoes_curso)
 filtro_verticalizou = st.sidebar.selectbox("Verticalizou:", ["Todas", "Sim", "Não"])
 filtro_bolsista = st.sidebar.selectbox("Bolsista:", ["Todas", "Sim", "Não"])
 
-projetos_periodo = filtrar_periodo(projetos, ano_ini, ano_fim)
-publicacoes_periodo = publicacoes[publicacoes["ano"].between(ano_ini, ano_fim)]
-premiacoes_periodo = premiacoes[premiacoes["ano"].between(ano_ini, ano_fim)]
-eventos_periodo = eventos[eventos["ano"].between(ano_ini, ano_fim)]
+# Aplica os filtros de período nos dados
+projetos_periodo = filtrar_periodo(projetos, ano_inicio, ano_fim)
+publicacoes_periodo = publicacoes[publicacoes["ano"].between(ano_inicio, ano_fim)]
+premiacoes_periodo = premiacoes[premiacoes["ano"].between(ano_inicio, ano_fim)]
+eventos_periodo = eventos[eventos["ano"].between(ano_inicio, ano_fim)]
 
-st.title("    Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado")
-st.caption(f"Período {ano_ini} a {ano_fim}")
+# abas
+st.title("Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado")
+st.caption(f"Período {ano_inicio} a {ano_fim}")
 
-tab_est, tab_doc, tab_projetos, tab_pub, tab_eventos, tab_parcerias, tab_sobre = st.tabs([
-    "Estudantes", "Docentes", "Projetos", "Publicações", "Eventos e Premiações", "Parcerias", "Sobre"
+abas = st.tabs([
+    "Estudantes", "Docentes", "Projetos", "Publicações",
+    "Eventos e Premiações", "Parcerias", "Sobre"
 ])
+aba_estudantes, aba_docentes, aba_projetos, aba_publicacoes, aba_eventos, aba_parcerias, aba_sobre = abas
 
-#aba estudantes 
-with tab_est:
+# aba estudantes 
+with aba_estudantes:
     secao("Participação no Projeto Meninas Digitais no Cerrado")
 
-    alunas_periodo = filtrar_alunas_periodo(alunas, ano_ini, ano_fim)
+    alunas_periodo = filtrar_alunas_periodo(alunas, ano_inicio, ano_fim)
     alunas_filtradas = alunas_periodo.copy()
 
+    # Filtros adicionais
     if filtro_curso == "Técnico":
         alunas_filtradas = alunas_filtradas[alunas_filtradas["curso"].apply(lambda x: "Técnico" in str(x))]
     elif filtro_curso == "Graduação":
@@ -297,112 +290,83 @@ with tab_est:
     if filtro_bolsista != "Todas":
         alunas_filtradas = alunas_filtradas[alunas_filtradas["bolsista"] == filtro_bolsista]
 
-    # Contar alunas que fizeram Técnico (incluindo as que fizeram só Técnico e as que fizeram Técnico+Graduação)
+    # Alunas que fizeram Técnico
     alunas_tecnico = alunas_filtradas[alunas_filtradas["curso"].apply(
-        lambda x: any("Técnico" in c for c in get_cursos_list(x))
+        lambda x: any("Técnico" in c for c in lista_cursos(x))
     )]
-    
-    # Contar alunas que fizeram Graduação (incluindo as que fizeram só Graduação e as que fizeram Técnico+Graduação)
+    # Alunas que fizeram Graduação
     alunas_graduacao = alunas_filtradas[alunas_filtradas["curso"].apply(
-        lambda x: any("Graduação" in c or "Licenciatura" in c or "Bacharelado" in c for c in get_cursos_list(x))
+        lambda x: any("Graduação" in c or "Licenciatura" in c or "Bacharelado" in c for c in lista_cursos(x))
     )]
-    
+
     st.markdown("### Ensino Médio Técnico")
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Total de alunas", len(alunas_tecnico))
     with col2:
         verticalizou_count = len(alunas_tecnico[alunas_tecnico["verticalizou"] == "Sim"]) if not alunas_tecnico.empty and "verticalizou" in alunas_tecnico.columns else 0
-        st.metric(
-            "Verticalizaram",
-            verticalizou_count,
-        )
+        st.metric("Verticalizaram", verticalizou_count)
     with col3:
         bolsistas_count = len(alunas_tecnico[alunas_tecnico["bolsista"] == "Sim"]) if not alunas_tecnico.empty and "bolsista" in alunas_tecnico.columns else 0
-        st.metric(
-            "Bolsistas",
-            bolsistas_count,
-        )
+        st.metric("Bolsistas", bolsistas_count)
 
     st.markdown("---")
-
     st.markdown("### Bacharelado em Sistemas de Informação")
-    
-    # Contar alunas de graduação (incluindo as que têm múltiplos cursos)
     total_graduacao = 0
     bolsistas_graduacao = 0
-    
     for _, aluna in alunas_filtradas.iterrows():
-        cursos = get_cursos_list(aluna['curso'])
-        # Verifica se tem algum curso de graduação
-        tem_graduacao = any(
-            "Graduação" in c or "Licenciatura" in c or "Bacharelado" in c 
-            for c in cursos
-        )
+        cursos = lista_cursos(aluna['curso'])
+        tem_graduacao = any("Graduação" in c or "Licenciatura" in c or "Bacharelado" in c for c in cursos)
         if tem_graduacao:
             total_graduacao += 1
             if aluna['bolsista'] == 'Sim':
                 bolsistas_graduacao += 1
-    
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Total de alunas", total_graduacao)
     with col2:
-        st.metric(
-            "Bolsistas",
-            bolsistas_graduacao,
-        )
+        st.metric("Bolsistas", bolsistas_graduacao)
 
-    # --- OBSERVAÇÃO SOBRE DUPLA CONTAGEM ---
-    # Verifica se há alunas que estão em ambas as categorias
+    # Observação sobre alunas que estão em ambas as categorias
     alunas_tec_e_grad = alunas_filtradas[
         alunas_filtradas["curso"].apply(
-            lambda x: any("Técnico" in c for c in get_cursos_list(x))
+            lambda x: any("Técnico" in c for c in lista_cursos(x))
         ) &
         alunas_filtradas["curso"].apply(
-            lambda x: any("Graduação" in c or "Licenciatura" in c or "Bacharelado" in c for c in get_cursos_list(x))
+            lambda x: any("Graduação" in c or "Licenciatura" in c or "Bacharelado" in c for c in lista_cursos(x))
         )
     ]
-
     if not alunas_tec_e_grad.empty:
         nomes = ", ".join(alunas_tec_e_grad["nome"].tolist())
+        soma_totais = len(alunas_tecnico) + total_graduacao
+        total_unicas = len(alunas_filtradas)
+
         st.markdown(f"""
         <div style="background:#fff3cd;border-left:4px solid #ffc107;padding:0.6rem 1rem;
             border-radius:4px;margin-top:1rem;font-size:0.85rem;color:#856404;">
-            <strong>Observação:</strong> As alunas <strong>{nomes}</strong> aparecem em <strong>ambas</strong> as categorias 
-            (cursaram Técnico <em>e</em> Graduação). Por isso, a soma dos totais (Técnico + Graduação) é <strong>35</strong>, 
-            mas o <strong>total único de alunas no período é {len(alunas_filtradas)}</strong>.
+            <strong>Observação:</strong> As alunas <strong>{nomes}</strong> aparecem em <strong>ambas</strong> as categorias
+            (cursaram Técnico <em>e</em> Graduação). Por isso, a soma dos totais (Técnico + Graduação) é <strong>{soma_totais}</strong>,
+            mas o <strong>total único de alunas no período é {total_unicas}</strong>.
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-
-
-    # Info de resultados 
+    # Mostra quantas alunas estão sendo exibidas
     total_filtradas = len(alunas_filtradas)
     total_geral = len(alunas_periodo)
     if total_filtradas == total_geral:
-        st.markdown(
-            f'<p class="resultados-info">{total_geral} estudantes no período</p>',
-            unsafe_allow_html=True,
-        )
+        st.markdown(f'<p class="resultados-info">{total_geral} estudantes no período</p>', unsafe_allow_html=True)
     else:
-        st.markdown(
-            f'<p class="resultados-info">Exibindo {total_filtradas} de {total_geral} estudantes no período</p>',
-            unsafe_allow_html=True,
-        )
+        st.markdown(f'<p class="resultados-info">Exibindo {total_filtradas} de {total_geral} estudantes no período</p>', unsafe_allow_html=True)
 
-    #  Cards individuais 
+    # Cards individuais de cada aluna
     if alunas_filtradas.empty:
-        st.markdown(
-            '<div class="sem-resultado">Nenhuma estudante encontrada com os filtros selecionados.</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<div class="sem-resultado">Nenhuma estudante encontrada com os filtros selecionados.</div>', unsafe_allow_html=True)
     else:
         for _, aluna in alunas_filtradas.iterrows():
-            proj_aluna, proj_docente, pub_aluna, pub_docente, eh_aluna = verificar_e_separar_resultados(
-                aluna["nome"], projetos_periodo, publicacoes_periodo, alunas, docentes, ano_ini, ano_fim
+            proj_aluna, proj_docente, pub_aluna, pub_docente, eh_aluna = separar_por_papel(
+                aluna["nome"], projetos_periodo, publicacoes_periodo, alunas, docentes, ano_inicio, ano_fim
             )
 
             vert_val = aluna["verticalizou"]
@@ -415,17 +379,16 @@ with tab_est:
                 badges_html += ' <span class="badge badge-vert">Verticalizou</span>'
 
             label = f"{aluna['nome']} ({aluna['curso']}: {aluna['periodo']})"
-            
-            # Verificar se é a Thalia para mostrar separação por papel
-            nome_base = _nome_base(aluna['nome'])
+
+            nome_base = nome_sem_prefixos(aluna['nome'])
             is_thalia = 'thalia' in nome_base
-            
+
             with st.expander(label):
                 st.markdown(f'<div style="margin-bottom:0.5rem;">{badges_html}</div>', unsafe_allow_html=True)
 
-                info_col, proj_col, pub_col = st.columns([1, 1.5, 2])
+                col_info, col_proj, col_pub = st.columns([1, 1.5, 2])
 
-                with info_col:
+                with col_info:
                     st.markdown(f"""
                     <div class="det-label">Bolsista</div>
                     <div class="det-valor">{aluna['bolsista']}</div>
@@ -434,174 +397,152 @@ with tab_est:
                     <div class="det-label">Curso</div>
                     <div class="det-valor">{aluna['curso']}</div>
                     """, unsafe_allow_html=True)
-                    
-                    # Mostrar observação se existir
                     observacao = str(aluna.get('observacao', '')).strip()
                     if observacao and observacao != 'nan':
                         st.markdown(f"""
                         <div class="det-label" style="margin-top:0.65rem;">Observação</div>
-                        <div class="det-valor" style="font-size:0.8rem;color:{TEXTO_SECUNDARIO};">{observacao}</div>
+                        <div class="det-valor" style="font-size:0.8rem;color:{cor_texto_secundario};">{observacao}</div>
                         """, unsafe_allow_html=True)
 
-                with proj_col:
+                with col_proj:
                     if is_thalia:
-                        # Mostrar separação apenas para a Thalia
                         if proj_aluna or proj_docente:
                             if proj_aluna:
-                                st.markdown(f'<div class="det-label" style="color:{COR_VERMELHO};">Como aluna ({len(proj_aluna)})</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="det-label" style="color:{vermelho};">Como aluna ({len(proj_aluna)})</div>', unsafe_allow_html=True)
                                 for p in proj_aluna:
-                                    tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                    cor_tipo = cores_projetos.get(p["tipo"], vermelho)
                                     st.markdown(f"""
                                     <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
-                                        margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
-                                        <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
-                                        <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
-                                        <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                        margin-bottom:0.35rem;border-left:3px solid {cor_tipo};">
+                                        <span style="font-size:0.8rem;font-weight:600;color:{cor_texto};">{p['nome']}</span><br>
+                                        <span style="font-size:0.7rem;color:{cor_tipo};font-weight:600;">{p['tipo']}</span>
+                                        <span style="font-size:0.7rem;color:{cor_texto_terciario};"> {p['periodo']}</span>
                                     </div>
                                     """, unsafe_allow_html=True)
-                            
                             if proj_docente:
                                 st.markdown("---")
                                 st.markdown(f'<div class="det-label">Como professora ({len(proj_docente)})</div>', unsafe_allow_html=True)
                                 for p in proj_docente:
-                                    tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                    cor_tipo = cores_projetos.get(p["tipo"], vermelho)
                                     st.markdown(f"""
                                     <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
-                                        margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
-                                        <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
-                                        <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
-                                        <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                        margin-bottom:0.35rem;border-left:3px solid {cor_tipo};">
+                                        <span style="font-size:0.8rem;font-weight:600;color:{cor_texto};">{p['nome']}</span><br>
+                                        <span style="font-size:0.7rem;color:{cor_tipo};font-weight:600;">{p['tipo']}</span>
+                                        <span style="font-size:0.7rem;color:{cor_texto_terciario};"> {p['periodo']}</span>
                                     </div>
                                     """, unsafe_allow_html=True)
                         else:
                             st.caption("Nenhum projeto no período")
                     else:
-                        # Para outras alunas, mostrar apenas "Projetos"
                         st.markdown(f'<div class="det-label">Projetos ({len(proj_aluna)})</div>', unsafe_allow_html=True)
                         if proj_aluna:
                             for p in proj_aluna:
-                                tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                cor_tipo = cores_projetos.get(p["tipo"], vermelho)
                                 st.markdown(f"""
                                 <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
-                                    margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
-                                    <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
-                                    <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
-                                    <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                    margin-bottom:0.35rem;border-left:3px solid {cor_tipo};">
+                                    <span style="font-size:0.8rem;font-weight:600;color:{cor_texto};">{p['nome']}</span><br>
+                                    <span style="font-size:0.7rem;color:{cor_tipo};font-weight:600;">{p['tipo']}</span>
+                                    <span style="font-size:0.7rem;color:{cor_texto_terciario};"> {p['periodo']}</span>
                                 </div>
                                 """, unsafe_allow_html=True)
                         else:
                             st.caption("Nenhum projeto no período")
 
-                with pub_col:
+                with col_pub:
                     if is_thalia:
-                        # Mostrar separação apenas para a Thalia
                         if pub_aluna or pub_docente:
                             if pub_aluna:
-                                st.markdown(f'<div class="det-label" style="color:{COR_VERMELHO};">Como aluna ({len(pub_aluna)})</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="det-label" style="color:{vermelho};">Como aluna ({len(pub_aluna)})</div>', unsafe_allow_html=True)
                                 for p in pub_aluna:
                                     link = str(p.get('link', '')).strip()
                                     tem_link = pd.notna(p.get('link')) and link
-                                    alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
-                                    btn = (
+                                    alcance_cor = vermelho if p['alcance'] == "Internacional" else vermelho_claro
+                                    botao = (
                                         f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
-                                        f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                        f'padding:3px 10px;background:{vermelho};color:#fff;border-radius:4px;'
                                         f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
                                     ) if tem_link else ''
-                                    card_publicacao(p, alcance_cor, btn)
-                            
+                                    card_publicacao(p, alcance_cor, botao)
                             if pub_docente:
                                 st.markdown("---")
                                 st.markdown(f'<div class="det-label">Como professora ({len(pub_docente)})</div>', unsafe_allow_html=True)
                                 for p in pub_docente:
                                     link = str(p.get('link', '')).strip()
                                     tem_link = pd.notna(p.get('link')) and link
-                                    alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
-                                    btn = (
+                                    alcance_cor = vermelho if p['alcance'] == "Internacional" else vermelho_claro
+                                    botao = (
                                         f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
-                                        f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                        f'padding:3px 10px;background:{vermelho};color:#fff;border-radius:4px;'
                                         f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
                                     ) if tem_link else ''
-                                    card_publicacao(p, alcance_cor, btn)
+                                    card_publicacao(p, alcance_cor, botao)
                         else:
                             st.caption("Nenhuma publicação no período")
                     else:
-                        # Para outras alunas, mostrar apenas "Publicações"
                         st.markdown(f'<div class="det-label">Publicações ({len(pub_aluna)})</div>', unsafe_allow_html=True)
                         if pub_aluna:
                             for p in pub_aluna:
                                 link = str(p.get('link', '')).strip()
                                 tem_link = pd.notna(p.get('link')) and link
-                                alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
-                                btn = (
+                                alcance_cor = vermelho if p['alcance'] == "Internacional" else vermelho_claro
+                                botao = (
                                     f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
-                                    f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                    f'padding:3px 10px;background:{vermelho};color:#fff;border-radius:4px;'
                                     f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
                                 ) if tem_link else ''
-                                card_publicacao(p, alcance_cor, btn)
+                                card_publicacao(p, alcance_cor, botao)
                         else:
                             st.caption("Nenhuma publicação no período")
 
-    # Gráficos de distribuição - após os cards
+    # Gráficos de distribuição
     secao("Indicadores de Raça")
-    
-    # Gráfico 1: Pizza por Raça/Etnia
     if not alunas_filtradas.empty and 'raca' in alunas_filtradas.columns:
-        raca_count = alunas_filtradas['raca'].value_counts().reset_index()
-        raca_count.columns = ['Raça/Etnia', 'Quantidade']
-        
+        contagem_raca = alunas_filtradas['raca'].value_counts().reset_index()
+        contagem_raca.columns = ['Raça/Etnia', 'Quantidade']
         fig_raca = px.pie(
-            raca_count, 
-            names='Raça/Etnia', 
+            contagem_raca,
+            names='Raça/Etnia',
             values='Quantidade',
             color_discrete_sequence=['#e57373', '#c62828', '#b71c1c', '#880e4f', '#4a148c']
         )
-        fig_raca.update_layout(
-            height=400,
-            paper_bgcolor=FUNDO,
-            plot_bgcolor=FUNDO,
-            showlegend=True
-        )
+        fig_raca.update_layout(height=400, paper_bgcolor=fundo, plot_bgcolor=fundo, showlegend=True)
         st.plotly_chart(fig_raca, use_container_width=True)
-    
+
     secao("Indicadores de Curso")
-    
     if not alunas_filtradas.empty:
-        # Contar alunas únicas por curso (cada aluna conta apenas uma vez)
-        cursos_contagem = {}
+        contagem_cursos = {}
         alunas_contadas = set()
-        
         for idx, aluna in alunas_filtradas.iterrows():
-            aluna_id = f"{aluna['nome']}_{aluna['periodo']}"
-            
-            if aluna_id not in alunas_contadas:
-                alunas_contadas.add(aluna_id)
-                cursos = get_cursos_list(aluna['curso'])
+            id_aluna = f"{aluna['nome']}_{aluna['periodo']}"
+            if id_aluna not in alunas_contadas:
+                alunas_contadas.add(id_aluna)
+                cursos = lista_cursos(aluna['curso'])
                 for curso in cursos:
-                    # Normalizar nome do curso
-                    curso_normalizado = curso
+                    # Normaliza o nome do curso para ficar padronizado
                     if 'Técnico em Informática para Internet' in curso:
-                        curso_normalizado = 'Técnico em Informática para Internet'
+                        curso_norm = 'Técnico em Informática para Internet'
                     elif 'Técnico em Informática' in curso:
-                        curso_normalizado = 'Técnico em Informática'
+                        curso_norm = 'Técnico em Informática'
                     elif 'Técnico em Agropecuária' in curso:
-                        curso_normalizado = 'Técnico em Agropecuária'
+                        curso_norm = 'Técnico em Agropecuária'
                     elif 'Técnico em Inteligência Artificial' in curso:
-                        curso_normalizado = 'Técnico em Inteligência Artificial'
+                        curso_norm = 'Técnico em Inteligência Artificial'
                     elif 'Licenciatura em Química' in curso:
-                        curso_normalizado = 'Licenciatura em Química'
+                        curso_norm = 'Licenciatura em Química'
                     elif 'Bacharelado em Sistemas de Informação' in curso:
-                        curso_normalizado = 'Bacharelado em Sistemas de Informação'
-                    
-                    cursos_contagem[curso_normalizado] = cursos_contagem.get(curso_normalizado, 0) + 1
-        
-        if cursos_contagem:
-            cursos_df = pd.DataFrame([
+                        curso_norm = 'Bacharelado em Sistemas de Informação'
+                    else:
+                        curso_norm = curso
+                    contagem_cursos[curso_norm] = contagem_cursos.get(curso_norm, 0) + 1
+
+        if contagem_cursos:
+            df_cursos = pd.DataFrame([
                 {'Curso': curso, 'Quantidade': qtd}
-                for curso, qtd in cursos_contagem.items()
+                for curso, qtd in contagem_cursos.items()
             ])
-            
-            # Ordenar cursos na ordem especificada
-            ordem_especifica = [
+            ordem = [
                 'Técnico em Informática para Internet',
                 'Técnico em Informática',
                 'Técnico em Agropecuária',
@@ -609,159 +550,149 @@ with tab_est:
                 'Licenciatura em Química',
                 'Bacharelado em Sistemas de Informação'
             ]
-            cursos_df['ordem'] = cursos_df['Curso'].apply(
-                lambda x: ordem_especifica.index(x) if x in ordem_especifica else len(ordem_especifica)
+            df_cursos['ordem'] = df_cursos['Curso'].apply(
+                lambda x: ordem.index(x) if x in ordem else len(ordem)
             )
-            cursos_df = cursos_df.sort_values('ordem')
-            
+            df_cursos = df_cursos.sort_values('ordem')
             fig_curso = px.pie(
-                cursos_df,
+                df_cursos,
                 names='Curso',
                 values='Quantidade',
                 color_discrete_sequence=['#e57373', '#c62828', '#b71c1c', '#880e4f', '#4a148c', '#311b92']
             )
-            fig_curso.update_layout(
-                height=400,
-                paper_bgcolor=FUNDO,
-                plot_bgcolor=FUNDO,
-                showlegend=True
-            )
+            fig_curso.update_layout(height=400, paper_bgcolor=fundo, plot_bgcolor=fundo, showlegend=True)
             st.plotly_chart(fig_curso, use_container_width=True)
 
-# aba docentes
-with tab_doc:
+# ============================================================
+# 7. ABA DOCENTES
+# ============================================================
+with aba_docentes:
     secao("Corpo docente")
     st.metric("Total de docentes", len(docentes))
     st.markdown("---")
 
     for _, docente in docentes.iterrows():
-        proj_aluna, proj_docente, pub_aluna, pub_docente, eh_aluna = verificar_e_separar_resultados(
-            docente["nome"], projetos_periodo, publicacoes_periodo, alunas, docentes, ano_ini, ano_fim
+        proj_aluna, proj_docente, pub_aluna, pub_docente, eh_aluna = separar_por_papel(
+            docente["nome"], projetos_periodo, publicacoes_periodo, alunas, docentes, ano_inicio, ano_fim
         )
 
         lattes_url = str(docente.get('lattes', '')).strip()
         email = docente.get('email', '')
 
-        nome_exibido = _nome_base(docente["nome"]).title()
-        
-        # Verificar se é a Thalia para mostrar separação por cargo
+        nome_exibido = nome_sem_prefixos(docente["nome"]).title()
         is_thalia = 'thalia' in nome_exibido.lower()
-        
+
         label = f"{docente['nome']}"
 
         with st.expander(label):
-            info_col, proj_col, pub_col = st.columns([1, 1.5, 2])
+            col_info, col_proj, col_pub = st.columns([1, 1.5, 2])
 
-            with info_col:
+            with col_info:
                 st.markdown(f"""
                 <div class="det-label">Email</div>
                 <div class="det-valor">{email or 'Não informado'}</div>
                 <div class="det-label" style="margin-top:0.65rem;">Lattes</div>
                 <div style="margin-top:0.3rem;">
-                    {'<a href="' + lattes_url + '" target="_blank" style="display:inline-block;padding:4px 12px;background:' + COR_VERMELHO + ';color:#fff;border-radius:5px;font-size:0.75rem;font-weight:600;text-decoration:none;">Acessar currículo Lattes</a>' if lattes_url else '<span style="font-size:0.82rem;color:' + TEXTO_TERCIARIO + ';">Não informado</span>'}
+                    {'<a href="' + lattes_url + '" target="_blank" style="display:inline-block;padding:4px 12px;background:' + vermelho + ';color:#fff;border-radius:5px;font-size:0.75rem;font-weight:600;text-decoration:none;">Acessar currículo Lattes</a>' if lattes_url else '<span style="font-size:0.82rem;color:' + cor_texto_terciario + ';">Não informado</span>'}
                 </div>
                 """, unsafe_allow_html=True)
 
-            with proj_col:
+            with col_proj:
                 if is_thalia:
-                    # Mostrar separação apenas para a Thalia
                     if proj_aluna or proj_docente:
                         if proj_aluna:
-                            st.markdown(f'<div class="det-label" style="color:{COR_VERMELHO};">Como aluna ({len(proj_aluna)})</div>', unsafe_allow_html=True)
+                            st.markdown(f'<div class="det-label" style="color:{vermelho};">Como aluna ({len(proj_aluna)})</div>', unsafe_allow_html=True)
                             for p in proj_aluna:
-                                tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                cor_tipo = cores_projetos.get(p["tipo"], vermelho)
                                 st.markdown(f"""
                                 <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
-                                    margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
-                                    <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
-                                    <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
-                                    <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                    margin-bottom:0.35rem;border-left:3px solid {cor_tipo};">
+                                    <span style="font-size:0.8rem;font-weight:600;color:{cor_texto};">{p['nome']}</span><br>
+                                    <span style="font-size:0.7rem;color:{cor_tipo};font-weight:600;">{p['tipo']}</span>
+                                    <span style="font-size:0.7rem;color:{cor_texto_terciario};"> {p['periodo']}</span>
                                 </div>
                                 """, unsafe_allow_html=True)
-                        
                         if proj_docente:
                             st.markdown("---")
                             st.markdown(f'<div class="det-label">Como professora ({len(proj_docente)})</div>', unsafe_allow_html=True)
                             for p in proj_docente:
-                                tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                                cor_tipo = cores_projetos.get(p["tipo"], vermelho)
                                 st.markdown(f"""
                                 <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
-                                    margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
-                                    <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
-                                    <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
-                                    <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                    margin-bottom:0.35rem;border-left:3px solid {cor_tipo};">
+                                    <span style="font-size:0.8rem;font-weight:600;color:{cor_texto};">{p['nome']}</span><br>
+                                    <span style="font-size:0.7rem;color:{cor_tipo};font-weight:600;">{p['tipo']}</span>
+                                    <span style="font-size:0.7rem;color:{cor_texto_terciario};"> {p['periodo']}</span>
                                 </div>
                                 """, unsafe_allow_html=True)
                     else:
                         st.caption("Nenhum projeto no período")
                 else:
-                    # Para outros docentes, mostrar apenas "Projetos"
                     st.markdown(f'<div class="det-label">Projetos ({len(proj_docente)})</div>', unsafe_allow_html=True)
                     if proj_docente:
                         for p in proj_docente:
-                            tipo_cor = {"Ensino": "#1565c0", "Pesquisa": "#4527a0", "Extensao": "#2e7d32"}.get(p["tipo"], COR_VERMELHO)
+                            cor_tipo = cores_projetos.get(p["tipo"], vermelho)
                             st.markdown(f"""
                             <div style="background:#f9f9f9;border-radius:6px;padding:0.45rem 0.7rem;
-                                margin-bottom:0.35rem;border-left:3px solid {tipo_cor};">
-                                <span style="font-size:0.8rem;font-weight:600;color:{TEXTO};">{p['nome']}</span><br>
-                                <span style="font-size:0.7rem;color:{tipo_cor};font-weight:600;">{p['tipo']}</span>
-                                <span style="font-size:0.7rem;color:{TEXTO_TERCIARIO};"> {p['periodo']}</span>
+                                margin-bottom:0.35rem;border-left:3px solid {cor_tipo};">
+                                <span style="font-size:0.8rem;font-weight:600;color:{cor_texto};">{p['nome']}</span><br>
+                                <span style="font-size:0.7rem;color:{cor_tipo};font-weight:600;">{p['tipo']}</span>
+                                <span style="font-size:0.7rem;color:{cor_texto_terciario};"> {p['periodo']}</span>
                             </div>
                             """, unsafe_allow_html=True)
                     else:
                         st.caption("Nenhum projeto no período")
 
-            with pub_col:
+            with col_pub:
                 if is_thalia:
-                    # Mostrar separação apenas para a Thalia
                     if pub_aluna or pub_docente:
                         if pub_aluna:
-                            st.markdown(f'<div class="det-label" style="color:{COR_VERMELHO};">Como aluna ({len(pub_aluna)})</div>', unsafe_allow_html=True)
+                            st.markdown(f'<div class="det-label" style="color:{vermelho};">Como aluna ({len(pub_aluna)})</div>', unsafe_allow_html=True)
                             for p in pub_aluna:
                                 link = str(p.get('link', '')).strip()
                                 tem_link = pd.notna(p.get('link')) and link
-                                alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
-                                btn = (
+                                alcance_cor = vermelho if p['alcance'] == "Internacional" else vermelho_claro
+                                botao = (
                                     f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
-                                    f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                    f'padding:3px 10px;background:{vermelho};color:#fff;border-radius:4px;'
                                     f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
                                 ) if tem_link else ''
-                                card_publicacao(p, alcance_cor, btn)
-                        
+                                card_publicacao(p, alcance_cor, botao)
                         if pub_docente:
                             st.markdown("---")
                             st.markdown(f'<div class="det-label">Como professora ({len(pub_docente)})</div>', unsafe_allow_html=True)
                             for p in pub_docente:
                                 link = str(p.get('link', '')).strip()
                                 tem_link = pd.notna(p.get('link')) and link
-                                alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
-                                btn = (
+                                alcance_cor = vermelho if p['alcance'] == "Internacional" else vermelho_claro
+                                botao = (
                                     f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
-                                    f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                    f'padding:3px 10px;background:{vermelho};color:#fff;border-radius:4px;'
                                     f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
                                 ) if tem_link else ''
-                                card_publicacao(p, alcance_cor, btn)
+                                card_publicacao(p, alcance_cor, botao)
                     else:
                         st.caption("Nenhuma publicação no período")
                 else:
-                    # Para outros docentes, mostrar apenas "Publicações"
                     st.markdown(f'<div class="det-label">Publicações ({len(pub_docente)})</div>', unsafe_allow_html=True)
                     if pub_docente:
                         for p in pub_docente:
                             link = str(p.get('link', '')).strip()
                             tem_link = pd.notna(p.get('link')) and link
-                            alcance_cor = COR_VERMELHO if p['alcance'] == "Internacional" else COR_VERMELHO_GRAFICO
-                            btn = (
+                            alcance_cor = vermelho if p['alcance'] == "Internacional" else vermelho_claro
+                            botao = (
                                 f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.3rem;'
-                                f'padding:3px 10px;background:{COR_VERMELHO};color:#fff;border-radius:4px;'
+                                f'padding:3px 10px;background:{vermelho};color:#fff;border-radius:4px;'
                                 f'font-size:0.68rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
                             ) if tem_link else ''
-                            card_publicacao(p, alcance_cor, btn)
+                            card_publicacao(p, alcance_cor, botao)
                     else:
                         st.caption("Nenhuma publicação no período")
 
-# aba projetos
-with tab_projetos:
+# ============================================================
+# 8. ABA PROJETOS
+# ============================================================
+with aba_projetos:
     secao("Projetos por tipo")
 
     projetos_ensino = projetos_periodo[projetos_periodo["tipo"] == "Ensino"]
@@ -779,15 +710,15 @@ with tab_projetos:
     st.markdown("---")
 
     if not projetos_periodo.empty:
-        tipos_count = projetos_periodo.groupby("tipo").size().reset_index(name="quantidade")
+        contagem_tipos = projetos_periodo.groupby("tipo").size().reset_index(name="quantidade")
         fig = px.bar(
-            tipos_count, x="tipo", y="quantidade",
+            contagem_tipos, x="tipo", y="quantidade",
             color="quantidade",
             color_continuous_scale=["#e57373", "#c62828"],
             text="quantidade"
         )
         fig.update_layout(
-            height=400, paper_bgcolor=FUNDO, plot_bgcolor=FUNDO,
+            height=400, paper_bgcolor=fundo, plot_bgcolor=fundo,
             xaxis_title="Tipo de projeto", yaxis_title="Quantidade", showlegend=False
         )
         fig.update_traces(textposition='outside')
@@ -801,18 +732,15 @@ with tab_projetos:
         if len(projetos_tipo) > 0:
             st.subheader(tipo_projeto)
             for _, projeto in projetos_tipo.iterrows():
-                # Montar o ano de execução em parênteses
-                ano_ini = projeto['ano_ini']
-                ano_fim = projeto.get('ano_fim')
-                if pd.isna(ano_fim) or ano_fim == ano_ini:
-                    ano_execucao = f"({ano_ini})"
+                ano_ini_proj = projeto['ano_ini']
+                ano_fim_proj = projeto.get('ano_fim')
+                if pd.isna(ano_fim_proj) or ano_fim_proj == ano_ini_proj:
+                    periodo_str = f"({ano_ini_proj})"
                 else:
-                    ano_execucao = f"({ano_ini} - {ano_fim})"
-                label = f"{projeto['nome']} {ano_execucao}"
-                
-                
+                    periodo_str = f"({ano_ini_proj} - {ano_fim_proj})"
+                label = f"{projeto['nome']} {periodo_str}"
+
                 with st.expander(label):
-                    # Exibe informações básicas
                     st.markdown(f"""
                     <div style="font-size:0.85rem; line-height:1.6;">
                         <strong>Equipe:</strong> {projeto.get('equipe', 'Não informado')}<br>
@@ -821,85 +749,63 @@ with tab_projetos:
                     </div>
                     """, unsafe_allow_html=True)
 
-                    # Resumo em details separado
                     resumo = projeto.get('resumo', '')
                     if resumo:
                         st.markdown(f"""
                         <details style="margin-top:0.5rem;">
-                            <summary style="cursor:pointer; color:{COR_VERMELHO}; font-weight:600;">Ver resumo</summary>
-                            <div style="background:#f5f5f5; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem;">
+                            <summary style="cursor:pointer; color:{vermelho}; font-weight:600;">Ver resumo</summary>
+                            <div style="background:#f5f5f5; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem; font-size:0.85rem; line-height:1.6;">
                                 {resumo}
                             </div>
                         </details>
                         """, unsafe_allow_html=True)
+
     st.markdown(
         f'<p class="fonte-site" style="margin-top: 1.5rem;">Fonte: <a href="https://meninasdigitaisnocerrado.com.br/projetos" target="_blank">meninasdigitaisnocerrado.com.br/projetos</a></p>',
         unsafe_allow_html=True
     )
     st.markdown("---")
-    secao("Nuvem de palavras (baseada nos resumos dos projetos")
+    secao("Nuvem de palavras (baseada nos resumos dos projetos)")
 
-    if not projetos_periodo.empty:
-        textos = projetos_periodo['resumo'].dropna().astype(str).tolist()
-        if textos:
-            texto_completo = ' '.join(textos)
-            
-            # Tenta importar e gerar a nuvem
-            try:
-                import matplotlib.pyplot as plt
-                from wordcloud import WordCloud
+    if not projetos_periodo.empty and projetos_periodo['resumo'].dropna().any():
+        import matplotlib.pyplot as plt
+        from wordcloud import WordCloud
+        import nltk
+        nltk.download('stopwords', quiet=True)
+        from nltk.corpus import stopwords as nltk_stopwords
 
-                stopwords = set([
-                    'de', 'da', 'do', 'e', 'para', 'com', 'em', 'uma', 'os', 'as', 'que', 'na', 'no', 'por', 'se',
-                    'é', 'ao', 'aos', 'das', 'dos', 'como', 'mais', 'entre', 'são', 'ser', 'ter', 'seu', 'sua',
-                    'foi', 'foram', 'vai', 'pode', 'também', 'mas', 'ou', 'quando', 'onde', 'já', 'não', 'sim',
-                    'este', 'esta', 'isso', 'aquele', 'aquela', 'estes', 'estas', 'esses', 'essas', 'à', 'às',
-                    'esse', 'essa', 'eles', 'elas', 'meu', 'minha', 'teu', 'tua', 'nosso', 'nossa', 'vosso', 'vossa',
-                    'me', 'te', 'nos', 'vos', 'lhe', 'lhes', 'o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas',
-                    'pelo', 'pela', 'pelos', 'pelas', 'ao', 'aos', 'à', 'às', 'no', 'nos', 'na', 'nas',
-                    'sobre', 'entre', 'até', 'desde', 'sem', 'contra', 'por', 'perante', 'após', 'sob', 'durante',
-                    'cerca', 'conforme', 'exceto', 'mediante', 'salvo', 'segundo', 'tirante', 'visto'
-                ])
+        stopwords = set(nltk_stopwords.words('portuguese'))
+        stopwords.update([
+            'presente', 'assim', 'desta', 'sobre', 'forma', 'modo', 'além', 'disso', 'bem', 'tanto',
+            'sendo', 'diante', 'meio', 'vista', 'quais', 'vistas', 'sentido', 'âmbito',
+            'propõe', 'propõem', 'propor', 'objetiva', 'objetivo', 'intuito',
+            'visa', 'busca', 'diversas', 'diversos', 'cada', 'todo', 'toda',
+            'todos', 'todas', 'outro', 'outra', 'outros', 'outras', 'desde',
+            'através', 'conforme', 'inclusive', 'ainda'
+        ])
 
-                wordcloud = WordCloud(
-                    width=800,
-                    height=400,
-                    background_color='white',
-                    stopwords=stopwords,
-                    max_words=80,
-                    colormap='Reds',
-                    collocations=False
-                ).generate(texto_completo)
+        texto_completo = ' '.join(projetos_periodo['resumo'].dropna().astype(str))
+        wordcloud = WordCloud(
+            width=800,
+            height=400,
+            background_color='white',
+            stopwords=stopwords,
+            max_words=80,
+            colormap='Reds',
+            collocations=False
+        ).generate(texto_completo)
 
-                fig, ax = plt.subplots(figsize=(10, 5))
-                ax.imshow(wordcloud, interpolation='bilinear')
-                ax.axis('off')
-                st.pyplot(fig)
-
-            except ImportError:
-                st.warning("Bibliotecas 'wordcloud' e/ou 'matplotlib' não instaladas. Para gerar a nuvem, instale com `pip install wordcloud matplotlib`.")
-                # Fallback: tabela com palavras mais frequentes
-                from collections import Counter
-                import re
-                palavras = re.findall(r'\b[a-zA-Záéíóúâêîôûãõç]+\b', texto_completo.lower())
-                stopwords_pt = set([
-                    'de', 'da', 'do', 'e', 'para', 'com', 'em', 'uma', 'os', 'as', 'que', 'na', 'no', 'por', 'se',
-                    'é', 'ao', 'aos', 'das', 'dos', 'como', 'mais', 'entre', 'são', 'ser', 'ter', 'seu', 'sua',
-                    'foi', 'foram', 'vai', 'pode', 'também', 'mas', 'ou', 'quando', 'onde', 'já', 'não', 'sim'
-                ])
-                palavras_filtradas = [p for p in palavras if p not in stopwords_pt and len(p) > 2]
-                contagem = Counter(palavras_filtradas).most_common(20)
-                df_palavras = pd.DataFrame(contagem, columns=['Palavra', 'Frequência'])
-                st.dataframe(df_palavras, use_container_width=True)
-        else:
-            st.info("Nenhum resumo disponível para gerar a nuvem.")
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.imshow(wordcloud, interpolation='bilinear')
+        ax.axis('off')
+        st.pyplot(fig)
     else:
-        st.info("Nenhum projeto no período para gerar a nuvem.")
+        st.info("Nenhum resumo disponível para gerar a nuvem.")
 
-   
-
-# aba publicações
-with tab_pub:
+# ============================================================
+# 9. ABA PUBLICAÇÕES
+# ============================================================
+with aba_publicacoes:
     secao("Publicações por ano")
 
     if not publicacoes_periodo.empty:
@@ -912,7 +818,7 @@ with tab_pub:
             text="quantidade"
         )
         fig.update_layout(
-            height=400, paper_bgcolor=FUNDO, plot_bgcolor=FUNDO,
+            height=400, paper_bgcolor=fundo, plot_bgcolor=fundo,
             xaxis_title="Ano", yaxis_title="Número de publicações", showlegend=False,
             xaxis=dict(tickmode='linear', dtick=1)
         )
@@ -926,11 +832,11 @@ with tab_pub:
 
         fig2 = px.bar(
             pubs_por_alcance, x="ano", y="quantidade", color="alcance",
-            color_discrete_map={"Nacional": COR_VERMELHO_GRAFICO, "Internacional": COR_VERMELHO},
+            color_discrete_map={"Nacional": vermelho_claro, "Internacional": vermelho},
             text="quantidade", barmode="group"
         )
         fig2.update_layout(
-            height=400, paper_bgcolor=FUNDO, plot_bgcolor=FUNDO,
+            height=400, paper_bgcolor=fundo, plot_bgcolor=fundo,
             xaxis_title="Ano", yaxis_title="Número de publicações",
             xaxis=dict(tickmode='linear', dtick=1)
         )
@@ -944,9 +850,7 @@ with tab_pub:
             pubs_ano = publicacoes_periodo[publicacoes_periodo["ano"] == ano]
             st.markdown(f"### {ano}")
             for _, pub in pubs_ano.iterrows():
-                link_pub = str(pub.get('link', '')).strip()
-                tem_link = pd.notna(pub.get('link')) and link_pub
-                card_publicacao_lista(pub, COR_VERMELHO, TEXTO, TEXTO_SECUNDARIO)
+                card_publicacao_lista(pub, vermelho, cor_texto, cor_texto_secundario)
     else:
         st.info("Nenhuma publicação no período selecionado.")
 
@@ -955,8 +859,7 @@ with tab_pub:
         unsafe_allow_html=True,
     )
 
-# aba eventos e premiações
-with tab_eventos:
+with aba_eventos:
     secao("Eventos e Premiações")
 
     col1, col2 = st.columns(2)
@@ -965,98 +868,187 @@ with tab_eventos:
     with col2:
         st.metric("Total de premiações", len(premiacoes_periodo))
 
+    # ============================================================
+    # 1. CORRIGIR FUNÇÕES E AGRUPAR DUPLICATAS
+    # ============================================================
     if not eventos_periodo.empty:
-        # Filtra eventos sem nome (linhas vazias)
-        eventos_periodo = eventos_periodo[eventos_periodo['nome'].notna() & (eventos_periodo['nome'].astype(str).str.strip() != '')]
-        if not eventos_periodo.empty:
-            # Preenche valores ausentes com padrões
-            eventos_periodo['tipo_atividade'] = eventos_periodo['tipo_atividade'].fillna('Evento').astype(str)
-            eventos_periodo['funcao'] = eventos_periodo['funcao'].fillna('Participante').astype(str)
-            eventos_periodo['link'] = eventos_periodo['link'].fillna('')
+        eventos_periodo = eventos_periodo.copy()
+        eventos_periodo['funcao'] = eventos_periodo['funcao'].replace('Promoção de eventos', 'Organização')
+        eventos_periodo['funcao'] = eventos_periodo['funcao'].str.strip().str.title()
+        eventos_periodo['funcao'] = eventos_periodo['funcao'].replace({
+            'Participante': 'Participante',
+            'Ouvinte': 'Ouvinte',
+            'Organização': 'Organização'
+        })
+        eventos_periodo['link'] = eventos_periodo['link'].fillna('')
 
-        eventos_por_ano = eventos_periodo.groupby("ano").size().reset_index(name="quantidade")
+        eventos_agrupados = eventos_periodo.groupby(
+            ['ano', 'nome', 'funcao', 'tipo_atividade', 'local'],
+            as_index=False
+        ).agg({
+            'link': lambda x: '; '.join([l for l in x if l.strip() != ''])
+        })
+        eventos_agrupados['link'] = eventos_agrupados['link'].replace('', pd.NA)
+        eventos_agrupados = eventos_agrupados.dropna(subset=['nome'])
+        eventos_para_graficos = eventos_agrupados
+    else:
+        eventos_para_graficos = eventos_periodo
 
-        fig_eventos = px.bar(
-            eventos_por_ano, x="ano", y="quantidade",
-            color="quantidade",
-            color_continuous_scale=["#e57373", "#c62828"],
-            text="quantidade", title="Participações em eventos por ano"
-        )
-        fig_eventos.update_layout(
-            height=450, paper_bgcolor=FUNDO, plot_bgcolor=FUNDO,
-            xaxis_title="Ano", yaxis_title="Número de participações", showlegend=False,
-            xaxis=dict(tickmode='linear', dtick=1)
-        )
-        fig_eventos.update_traces(textposition='outside')
-        st.plotly_chart(fig_eventos, use_container_width=True)
-
-
-    # Cards de eventos 
+    # ============================================================
+    # 2. LISTA DE EVENTOS POR CATEGORIA (PRIMEIRO NA PÁGINA)
+    # ============================================================
     st.markdown("---")
     secao("Eventos por categoria")
-    
-    # Definições dos tipos de participação
-    st.markdown("""
+
+    st.markdown(f"""
     <div style="background:#f5f5f5;border-radius:8px;padding:1rem;margin-bottom:1.5rem;font-size:0.85rem;color:#666;line-height:1.6;">
-        <strong>Padrão adotado: As definições acima foram estabelecidas conforme a padronização do Currículo Lattes</strong><br>
-        <strong>Organização:</strong> Atuação na organização e promoção do evento.<br>
-        <strong>Participante:</strong> Apresentação de trabalhos, publicação de artigos, palestras dadas ou condução de oficinas.<br>
-        <strong>Ouvinte:</strong> Presença no evento para assistir às apresentações e palestras.
+        <strong>Padrão adotado:</strong> As definições das funções foram estabelecidas conforme a padronização do Currículo Lattes:<br>
+        • <strong>Organização:</strong> Atuação na organização e promoção do evento.<br>
+        • <strong>Participante:</strong> Apresentação de trabalhos, publicação de artigos, palestras dadas ou condução de oficinas.<br>
+        • <strong>Ouvinte:</strong> Presença no evento para assistir às apresentações e palestras.<br><br>
+        <em>Nota: O tipo de atividade (como Construção Humana, Capacitação Tecnológica, Divulgação Científica, etc.) foram categorizados de acordo com a metodologia proposta no artigo:</em><br>
+        <a href="https://sol.sbc.org.br/index.php/wit/article/view/6714/6610" target="_blank" style="color:{vermelho};font-weight:600;text-decoration:underline;">
+            Agindo sobre a diferença: atividades de empoderamento feminino em prol da permanência de mulheres em cursos de Tecnologia da Informação
+        </a>.
     </div>
     """, unsafe_allow_html=True)
 
-    atividades = [
-        {"label": "Organização", "cor": "#673ab7", "funcao": "Organização"},
-        {"label": "Ouvinte", "cor": "#4caf50", "funcao": "Ouvinte"},
-        {"label": "Participante", "cor": "#2196f3", "funcao": "Participante"},
-    ]
+    # Cores em tons de vermelho para as áreas MDC
+    cores_mdc_vermelho = {
+        'Capacitação Tecnológica': '#b71c1c',
+        'Construção humana': '#c62828',
+        'Divulgação Científica': '#d32f2f',
+        'Representação e ampliação de alcance': '#e53935',
+        'Promoção de eventos': '#880e4f'
+    }
 
-    for atividade in atividades:
-        eventos_funcao = eventos_periodo[eventos_periodo['funcao'] == atividade['funcao']]
-        
-        if not eventos_funcao.empty:
-            eventos_funcao = eventos_funcao.sort_values('nome', ascending=True)
-            
-            label = f"{atividade['label']} ({len(eventos_funcao)})"
+    for cat in [
+        {"nome": "Organização", "funcao": "Organização"},
+        {"nome": "Participante", "funcao": "Participante"},
+        {"nome": "Ouvinte", "funcao": "Ouvinte"}
+    ]:
+        eventos_cat = eventos_para_graficos[eventos_para_graficos['funcao'] == cat['funcao']]
+        if not eventos_cat.empty:
+            eventos_cat = eventos_cat.sort_values(['ano', 'nome'], ascending=[False, True])
+            label = f"{cat['nome']} ({len(eventos_cat)})"
             with st.expander(label):
-                for _, evento in eventos_funcao.iterrows():
-                    is_destaque = False 
-                    
-                    badges = []
-                    badge_map = {
-                        'Palestra': 'badge-palestra',
-                        'Publicação': 'badge-publicacao', 
-                        'Oficina': 'badge-oficina',
-                        'Evento': 'badge-evento',
-                        'Viagem técnica': 'badge-viagem'
-                    }
-                    tipo_badge = badge_map.get(evento['tipo_atividade'], 'badge-evento')
-                    badges.append(f'<span class="badge {tipo_badge}">{evento["tipo_atividade"]}</span>')
-                    
-                    badge_html = ' '.join(badges)
-                    
-                    local = str(evento.get('local', '')).strip()
-                    if local and pd.notna(evento.get('local')):
-                        badge_html = f'<span class="badge badge-local">{local}</span> ' + badge_html
-                    
-                    link = str(evento.get('link', '')).strip()
-                    btn = ''
-                    if link:
-                        btn = f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.5rem;padding:4px 12px;background:{COR_VERMELHO};color:#fff;border-radius:6px;font-size:0.7rem;font-weight:600;text-decoration:none;">Acessar trabalho</a>'
+                for _, evento in eventos_cat.iterrows():
+                    # Área MDC com tom de vermelho
+                    area = str(evento.get('tipo_atividade', '')).strip()
+                    cor_area = cores_mdc_vermelho.get(area, '#ef5350')
+                    badge_area = f'<span class="badge" style="background:{cor_area};color:#fff;">{area}</span>' if area and area != 'nan' else ''
 
-                    card_class = 'card-evento destaque' if is_destaque else 'card-evento'
-                    
+                    # Badge do local com tom suave de vermelho
+                    local = str(evento.get('local', '')).strip()
+                    badge_local = f'<span class="badge" style="background:#ffebee;color:#c62828;border:1px solid #ffcdd2;">{local}</span>' if local and local != 'nan' else ''
+
+                    badges = ' '.join(filter(None, [badge_local, badge_area]))
+
+                    # Validação: só exibe o botão se houver link válido no CSV
+                    link_bruto = str(evento.get('link', '')).strip()
+                    botao_html = ''
+                    if pd.notna(evento.get('link')) and link_bruto and link_bruto.lower() not in ['nan', 'none', '']:
+                        links_validos = [
+                            l.strip() for l in link_bruto.split(';') 
+                            if l.strip() and l.strip().lower() not in ['nan', 'none', '']
+                        ]
+                        if links_validos:
+                            botoes = [
+                                f'<a href="{l}" target="_blank" style="display:inline-block;margin-top:0.3rem;margin-right:0.3rem;padding:4px 12px;background:{vermelho};color:#fff;border-radius:6px;font-size:0.7rem;font-weight:600;text-decoration:none;">Trabalho {idx+1 if len(links_validos) > 1 else ""}</a>'.replace('  ', ' ')
+                                for idx, l in enumerate(links_validos)
+                            ]
+                            botao_html = f'<div style="margin-top:0.5rem;">{" ".join(botoes)}</div>'
+
                     st.markdown(f"""
-                    <div class="{card_class}">
-                        <strong>{evento['nome']}</strong><br>
-                        <div>{badge_html}</div>
-                        <div style="text-align:right;font-size:0.75rem;color:{TEXTO_TERCIARIO};margin-top:0.5rem;">
-                            {int(evento['ano'])}
+                    <div style="background:#ffffff;border-radius:8px;padding:0.8rem 1rem;margin-bottom:0.8rem;
+                        border-left:5px solid {vermelho};box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                            <div style="font-weight:600;font-size:0.95rem;color:{cor_texto};flex:1;">
+                                {evento['nome']}
+                            </div>
+                            <div style="font-size:0.75rem;color:{cor_texto_terciario};white-space:nowrap;margin-left:0.5rem;">
+                                {int(evento['ano'])}
+                            </div>
                         </div>
-                        {btn}
+                        <div style="margin-top:0.2rem;display:flex;flex-wrap:wrap;gap:0.2rem;">
+                            {badges}
+                        </div>
+                        {botao_html}
                     </div>
                     """, unsafe_allow_html=True)
 
+    # ============================================================
+    # 3. GRÁFICOS (EM SEGUIDA)
+    # ============================================================
+    st.markdown("---")
+    secao("Indicadores e Gráficos de Eventos")
+
+    if not eventos_para_graficos.empty and 'funcao' in eventos_para_graficos.columns:
+        eventos_por_ano_funcao = eventos_para_graficos.groupby(['ano', 'funcao']).size().reset_index(name='quantidade')
+        eventos_por_ano_funcao = eventos_por_ano_funcao.sort_values('ano')
+
+        cores_funcao = {
+            'Organização': '#c62828',
+            'Ouvinte': '#e57373',
+            'Participante': '#ef5350'
+        }
+
+        fig_func = px.bar(
+            eventos_por_ano_funcao,
+            x='ano',
+            y='quantidade',
+            color='funcao',
+            barmode='group',
+            color_discrete_map=cores_funcao,
+            text='quantidade',
+            title='Participações em eventos por função e ano'
+        )
+        fig_func.update_layout(
+            height=400,
+            paper_bgcolor=fundo,
+            plot_bgcolor=fundo,
+            xaxis_title='Ano',
+            yaxis_title='Número de participações',
+            xaxis=dict(tickmode='linear', dtick=1)
+        )
+        fig_func.update_traces(textposition='outside')
+        st.plotly_chart(fig_func, use_container_width=True)
+
+    if not eventos_para_graficos.empty and 'tipo_atividade' in eventos_para_graficos.columns:
+        eventos_por_ano_tipo = eventos_para_graficos.groupby(['ano', 'tipo_atividade']).size().reset_index(name='quantidade')
+        eventos_por_ano_tipo = eventos_por_ano_tipo.sort_values('ano')
+
+        tipos = sorted(eventos_por_ano_tipo['tipo_atividade'].unique())
+        from plotly import colors
+        paleta_vermelhos = colors.sequential.Reds[3:]
+        cores_tipo = {}
+        for i, t in enumerate(tipos):
+            cores_tipo[t] = paleta_vermelhos[i % len(paleta_vermelhos)]
+
+        fig_tipo = px.bar(
+            eventos_por_ano_tipo,
+            x='ano',
+            y='quantidade',
+            color='tipo_atividade',
+            barmode='group',
+            color_discrete_map=cores_tipo,
+            text='quantidade',
+            title='Eventos por tipo de atividade e ano'
+        )
+        fig_tipo.update_layout(
+            height=400,
+            paper_bgcolor=fundo,
+            plot_bgcolor=fundo,
+            xaxis_title='Ano',
+            yaxis_title='Número de eventos',
+            xaxis=dict(tickmode='linear', dtick=1)
+        )
+        fig_tipo.update_traces(textposition='outside')
+        st.plotly_chart(fig_tipo, use_container_width=True)
+
+    # ============================================================
+    # 4. PREMIAÇÕES
+    # ============================================================
     st.markdown("---")
     secao("Premiações")
 
@@ -1070,7 +1062,7 @@ with tab_eventos:
             text="quantidade", title="Premiações conquistadas por ano"
         )
         fig_premiacoes.update_layout(
-            height=450, paper_bgcolor=FUNDO, plot_bgcolor=FUNDO,
+            height=450, paper_bgcolor=fundo, plot_bgcolor=fundo,
             xaxis_title="Ano", yaxis_title="Número de premiações", showlegend=False,
             xaxis=dict(tickmode='linear', dtick=1)
         )
@@ -1093,9 +1085,11 @@ with tab_eventos:
         f'<p class="fonte-site" style="margin-top: 2rem;">Fonte: <a href="https://meninasdigitaisnocerrado.com.br/premiacoes" target="_blank">meninasdigitaisnocerrado.com.br/premiacoes</a></p>',
         unsafe_allow_html=True,
     )
-
-# aba parcerias
-with tab_parcerias:
+    
+# ============================================================
+# 11. ABA PARCERIAS
+# ============================================================
+with aba_parcerias:
     secao("Parcerias")
 
     if not parcerias.empty:
@@ -1108,26 +1102,24 @@ with tab_parcerias:
             ano_fim = str(parceria.get('ano_fim', ''))
             link = str(parceria.get('link', '')).strip()
 
-            # Formata o período
             periodo = f"{ano_ini} - {ano_fim}" if ano_fim and ano_fim != 'nan' else ano_ini
 
-            # Botão de link se existir
-            btn_link = ''
+            botao_link = ''
             if link and link != 'nan' and link != '':
-                btn_link = f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.5rem;padding:4px 12px;background:{COR_VERMELHO};color:#fff;border-radius:6px;font-size:0.7rem;font-weight:600;text-decoration:none;">Acessar site</a>'
+                botao_link = f'<a href="{link}" target="_blank" style="display:inline-block;margin-top:0.5rem;padding:4px 12px;background:{vermelho};color:#fff;border-radius:6px;font-size:0.7rem;font-weight:600;text-decoration:none;">Acessar site</a>'
 
-            nome_escaped = html.escape(nome)
-            descricao_escaped = html.escape(descricao)
-            descricao_formatada = descricao_escaped.replace('\n', '<br>')
+            nome_escapado = html.escape(nome)
+            descricao_escapada = html.escape(descricao)
+            descricao_formatada = descricao_escapada.replace('\n', '<br>')
 
             html_card = (
                 f'<div class="card-publicacao" style="margin-bottom:1.5rem;">'
                 f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">'
-                f'<span class="alcance-badge" style="background:{COR_VERMELHO};">{periodo}</span>'
-                f'{btn_link}'
+                f'<span class="alcance-badge" style="background:{vermelho};">{periodo}</span>'
+                f'{botao_link}'
                 f'</div>'
-                f'<p style="margin:0.4rem 0 0.3rem;font-weight:500;color:{TEXTO};">{nome_escaped}</p>'
-                f'<p style="margin:0.2rem 0 0;color:{TEXTO_SECUNDARIO};line-height:1.6;">{descricao_formatada}</p>'
+                f'<p style="margin:0.4rem 0 0.3rem;font-weight:500;color:{cor_texto};">{nome_escapado}</p>'
+                f'<p style="margin:0.2rem 0 0;color:{cor_texto_secundario};line-height:1.6;">{descricao_formatada}</p>'
                 f'</div>'
             )
 
@@ -1135,12 +1127,12 @@ with tab_parcerias:
     else:
         st.info("Nenhuma parceria cadastrada.")
 
-# aba sobre
-with tab_sobre:
-
- 
+# ============================================================
+# 12. ABA SOBRE
+# ============================================================
+with aba_sobre:
     st.markdown(f"""
-    <div style="background:linear-gradient(135deg,{COR_VERMELHO} 0%,#8b0000 100%);
+    <div style="background:linear-gradient(135deg,{vermelho} 0%,#8b0000 100%);
         border-radius:12px;padding:2rem 2.5rem;margin-bottom:1.5rem;color:#fff;">
         <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;
             opacity:0.8;margin-bottom:0.4rem;">EDITAL Nº 11 de 03 de abril de 2025 - PIBIC</div>
@@ -1148,11 +1140,10 @@ with tab_sobre:
             Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado
     """, unsafe_allow_html=True)
 
-    # Sobre o projeto
     secao("Sobre o projeto")
     st.markdown(f"""
-    <div style="background:{CARD};border-radius:10px;padding:1.5rem 2rem;
-        box-shadow:0 1px 3px rgba(0,0,0,0.07);line-height:1.8;color:{TEXTO};font-size:0.95rem;">
+    <div style="background:{fundo_card};border-radius:10px;padding:1.5rem 2rem;
+        box-shadow:0 1px 3px rgba(0,0,0,0.07);line-height:1.8;color:{cor_texto};font-size:0.95rem;">
         O presente projeto de pesquisa celebra os <strong>10 anos do Meninas Digitais no Cerrado</strong>,
         iniciativa do IF Goiano - Campus Ceres e projeto parceiro do
         <strong>Programa Meninas Digitais (PMD)</strong> que busca incentivar a participação de
@@ -1171,64 +1162,62 @@ with tab_sobre:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Equipe
     secao("Equipe")
     col_bol, col_coord = st.columns(2)
 
     with col_bol:
         st.markdown(f"""
-        <div style="background:{CARD};border-radius:10px;padding:1.25rem 1.5rem;
-            box-shadow:0 1px 3px rgba(0,0,0,0.07);border-top:4px solid {COR_VERMELHO};">
+        <div style="background:{fundo_card};border-radius:10px;padding:1.25rem 1.5rem;
+            box-shadow:0 1px 3px rgba(0,0,0,0.07);border-top:4px solid {vermelho};">
             <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;
-                letter-spacing:0.08em;color:{COR_VERMELHO};margin-bottom:0.5rem;">Bolsista PIBIC</div>
-            <div style="font-size:1.05rem;font-weight:700;color:{TEXTO};">Sara Luiz de Farias</div>
-            <div style="font-size:0.82rem;color:{TEXTO_SECUNDARIO};margin-top:0.25rem;">
+                letter-spacing:0.08em;color:{vermelho};margin-bottom:0.5rem;">Bolsista PIBIC</div>
+            <div style="font-size:1.05rem;font-weight:700;color:{cor_texto};">Sara Luiz de Farias</div>
+            <div style="font-size:0.82rem;color:{cor_texto_secundario};margin-top:0.25rem;">
                 Bacharelanda em Sistemas de Informação<br>
                 IF Goiano - Campus Ceres<br>
                 <a href="http://lattes.cnpq.br/2013698994793152" target="_blank"
-                    style="display:inline-block;margin-top:0.4rem;padding:4px 12px;background:{COR_VERMELHO};color:#fff;border-radius:5px;font-size:0.75rem;font-weight:600;text-decoration:none;">Acessar currículo Lattes</a>
+                    style="display:inline-block;margin-top:0.4rem;padding:4px 12px;background:{vermelho};color:#fff;border-radius:5px;font-size:0.75rem;font-weight:600;text-decoration:none;">Acessar currículo Lattes</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
     with col_coord:
         st.markdown(f"""
-        <div style="background:{CARD};border-radius:10px;padding:1.25rem 1.5rem;
-            box-shadow:0 1px 3px rgba(0,0,0,0.07);border-top:4px solid {COR_VERMELHO};">
+        <div style="background:{fundo_card};border-radius:10px;padding:1.25rem 1.5rem;
+            box-shadow:0 1px 3px rgba(0,0,0,0.07);border-top:4px solid {vermelho};">
             <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;
-                letter-spacing:0.08em;color:{COR_VERMELHO};margin-bottom:0.5rem;">Coordenadora</div>
-            <div style="font-size:1.05rem;font-weight:700;color:{TEXTO};">Profa. Thalia Santos de Santana</div>
-            <div style="font-size:0.82rem;color:{TEXTO_SECUNDARIO};margin-top:0.25rem;">
+                letter-spacing:0.08em;color:{vermelho};margin-bottom:0.5rem;">Coordenadora</div>
+            <div style="font-size:1.05rem;font-weight:700;color:{cor_texto};">Profa. Thalia Santos de Santana</div>
+            <div style="font-size:0.82rem;color:{cor_texto_secundario};margin-top:0.25rem;">
                 Docente em Computação<br>
                 IF Goiano - Campus Ceres<br>
                 <a href="http://lattes.cnpq.br/8063677996827079" target="_blank"
-                    style="display:inline-block;margin-top:0.4rem;padding:4px 12px;background:{COR_VERMELHO};color:#fff;border-radius:5px;font-size:0.75rem;font-weight:600;text-decoration:none;">Acessar currículo Lattes</a>
+                    style="display:inline-block;margin-top:0.4rem;padding:4px 12px;background:{vermelho};color:#fff;border-radius:5px;font-size:0.75rem;font-weight:600;text-decoration:none;">Acessar currículo Lattes</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Como citar
     secao("Como citar o dashboard")
     st.markdown(f"""
-    <div style="background:{CARD};border-radius:10px;padding:1.25rem 1.5rem;
-        box-shadow:0 1px 3px rgba(0,0,0,0.07);border-left:4px solid {COR_VERMELHO};">
+    <div style="background:{fundo_card};border-radius:10px;padding:1.25rem 1.5rem;
+        box-shadow:0 1px 3px rgba(0,0,0,0.07);border-left:4px solid {vermelho};">
         <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;
-            color:{TEXTO_SECUNDARIO};margin-bottom:0.75rem;">Citação no texto</div>
-        <div style="font-size:0.88rem;color:{TEXTO};background:#f9f9f9;border-radius:6px;
+            color:{cor_texto_secundario};margin-bottom:0.75rem;">Citação no texto</div>
+        <div style="font-size:0.88rem;color:{cor_texto};background:#f9f9f9;border-radius:6px;
             padding:0.5rem 0.8rem;margin-bottom:1rem;">
             (Meninas Digitais no Cerrado, 2026)
         </div>
         <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;
-            color:{TEXTO_SECUNDARIO};margin-bottom:0.5rem;">Referência bibliográfica completa</div>
-        <div style="font-size:0.88rem;color:{TEXTO};line-height:1.8;">
+            color:{cor_texto_secundario};margin-bottom:0.5rem;">Referência bibliográfica completa</div>
+        <div style="font-size:0.88rem;color:{cor_texto};line-height:1.8;">
             MENINAS DIGITAIS NO CERRADO.
             <em>Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado.</em>
             Ceres: IF Goiano - Campus Ceres, 2026.
             Disponível em:
             <a href="https://meninasdigitaisnocerrado.com.br/indicadores" target="_blank"
-                style="color:{COR_VERMELHO};">meninasdigitaisnocerrado.com.br</a>.
+                style="color:{vermelho};">meninasdigitaisnocerrado.com.br</a>.
             Acesso em: dia mes e ano.
         </div>
     </div>
@@ -1236,14 +1225,13 @@ with tab_sobre:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Como usar
     secao("Como usar")
     st.markdown(f"""
-    <div style="background:{CARD};border-radius:10px;padding:1.25rem 1.5rem;
-        box-shadow:0 1px 3px rgba(0,0,0,0.07);border-left:4px solid {COR_VERMELHO};">
+    <div style="background:{fundo_card};border-radius:10px;padding:1.25rem 1.5rem;
+        box-shadow:0 1px 3px rgba(0,0,0,0.07);border-left:4px solid {vermelho};">
         Acesse o repositório no GitHub para instruções de instalação e execução do projeto.<br><br>
         <a href="https://github.com/saraafariass/ic2026" target="_blank"
-            style="display:inline-block;padding:6px 16px;background:{COR_VERMELHO};color:#fff;
+            style="display:inline-block;padding:6px 16px;background:{vermelho};color:#fff;
             border-radius:5px;font-size:0.82rem;font-weight:600;text-decoration:none;">
             Ver no GitHub
         </a>
@@ -1252,24 +1240,26 @@ with tab_sobre:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Tecnologias
     secao("Tecnologias utilizadas")
-    techs = [
+    tecnologias = [
         ("Python", "Linguagem principal"),
         ("Streamlit", "Interface web interativa"),
         ("Pandas", "Manipulação de dados"),
         ("Plotly", "Gráficos interativos"),
     ]
-    cols = st.columns(len(techs))
-    for col, (nome, desc) in zip(cols, techs):
+    cols = st.columns(len(tecnologias))
+    for col, (nome, desc) in zip(cols, tecnologias):
         col.markdown(f"""
-        <div style="background:{CARD};border-radius:8px;padding:0.75rem 1rem;
+        <div style="background:{fundo_card};border-radius:8px;padding:0.75rem 1rem;
             box-shadow:0 1px 2px rgba(0,0,0,0.06);text-align:center;">
-            <div style="font-weight:700;font-size:0.88rem;color:{TEXTO};">{nome}</div>
-            <div style="font-size:0.72rem;color:{TEXTO_SECUNDARIO};margin-top:3px;">{desc}</div>
+            <div style="font-weight:700;font-size:0.88rem;color:{cor_texto};">{nome}</div>
+            <div style="font-size:0.72rem;color:{cor_texto_secundario};margin-top:3px;">{desc}</div>
         </div>
         """, unsafe_allow_html=True)
 
+# ============================================================
+# 13. RODAPÉ
+# ============================================================
 st.markdown("---")
 st.markdown(
     f'<p class="fonte-site" style="text-align: center;">Última atualização: {datetime.now().strftime("%d/%m/%Y")}</p>',
