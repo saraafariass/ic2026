@@ -71,12 +71,12 @@ http://localhost:8501
 
 ## Dependências Principais
 
-* **streamlit** — Interface web interativa
-* **pandas** — Manipulação e tratamento das bases de dados
-* **plotly** — Gráficos interativos e dinâmicos
-* **matplotlib** — Renderização de gráficos estáticos
-* **wordcloud** — Geração de nuvem de palavras
-* **nltk** — Processamento de linguagem natural (Stopwords)
+* **streamlit**: Interface web interativa
+* **pandas**: Manipulação e tratamento das bases de dados
+* **plotly**: Gráficos interativos e dinâmicos
+* **matplotlib**: Renderização de gráficos estáticos
+* **wordcloud**: Geração de nuvem de palavras
+* **nltk**: Processamento de linguagem natural (Stopwords)
 
 ---
 
@@ -100,3 +100,22 @@ ic2026/
 * **Bolsista PIBIC:** Sara Luiz de Farias ([Lattes](http://lattes.cnpq.br/))
 * **Coordenadora:** Profa. Thalia Santos de Santana ([Lattes](http://lattes.cnpq.br/))
 * **Instituição:** Instituto Federal Goiano - Campus Ceres
+
+---
+
+
+## Sobre o projeto Meninas Digitais no Cerrado
+
+**Site oficial:** [meninasdigitaisnocerrado.com.br](https://meninasdigitaisnocerrado.com.br/)
+**Instagram:** [@meninasdigitaisnocerrado](https://www.instagram.com/meninasdigitaisnocerrado/)
+**YouTube:** [/c/meninasdigitaisnocerrado](https://www.youtube.com/c/meninasdigitaisnocerrado)
+**Contato:** meninasdigitaisnocerrado@gmail.com
+
+
+---
+
+## Explore os indicadores no site oficial
+
+**Site oficial:** [meninasdigitaisnocerrado.com.br/indicadores](https://meninasdigitaisnocerrado.com.br/indicadores)
+
+
