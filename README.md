@@ -1,91 +1,96 @@
-# Dashboard Meninas Digitais no Cerrado
 
-Dashboard interativo com a sistematização de 10 anos de dados abertos sobre gênero na Computação no Campus Ceres, desenvolvido no âmbito do projeto **Meninas Digitais no Cerrado**.
+# Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado
 
-🔗 **Acesse o dashboard:** [mdc-dashboard.streamlit.app](https://mdc-dashboard.streamlit.app/)
-
-📍 Também disponível embutido na página de [Indicadores](https://meninasdigitaisnocerrado.com.br/indicadores) do site oficial.
+Dashboard interativo desenvolvido em **Python** e **Streamlit** para visualização, sistematização e análise de 10 anos de indicadores históricos (2016 - 2026) do projeto **Meninas Digitais no Cerrado**.
 
 ---
 
-## Sobre o projeto
+##  Pré-requisitos
 
-Este projeto integra o edital institucional **Nº 11 de 03 de abril de 2025 (PIBIC)**, com o tema *"Sistematização de dados abertos sobre gênero na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado"*.
+* **Python 3.10+** instalado no seu computador.
+* **Git** configurado (opcional, para clonar o repositório).
 
-O dashboard reúne e visualiza dados sobre:
+---
 
-- **Estudantes**: participação de alunas no Ensino Médio Técnico e na Graduação
-- **Docentes**: corpo docente envolvido no projeto
-- **Projetos**: iniciativas de ensino, pesquisa e extensão
-- **Publicações**: produção científica ao longo dos anos
-- **Eventos e Premiações**: participações e reconhecimentos
-- **Parcerias**: articulação com a Rede Nacional RENACEE_MD
+##  Como Executar o Projeto
 
-## Equipe
+Siga os passos abaixo no terminal do seu computador (Linux, macOS ou Windows):
 
-| Papel | Nome |
-|---|---|
-| Bolsista PIBIC | Sara Luiz de Farias |
-| Coordenadora | Profa. Thalia Santos de Santana |
-
-**Instituição:** IF Goiano - Campus Ceres
-
-## Tecnologias utilizadas
-
-- [Python](https://www.python.org/)
-- [Streamlit](https://streamlit.io/) - interface web interativa
-- [Pandas](https://pandas.pydata.org/) - manipulação de dados
-- [Plotly](https://plotly.com/python/) - gráficos interativos
-
-## Estrutura do repositório
-
-```
-ic2026/
-├── app.py                 # aplicação principal (Streamlit)
-├── requirements.txt       # dependências Python
-├── assets/
-│   └── styles.py           # estilos (CSS) do dashboard
-├── alunas.csv
-├── docentes.csv
-├── projetos.csv
-├── publicacoes.csv
-├── premiacoes.csv
-└── eventos.csv
-```
-
-## Como rodar localmente
-
+### 1. Clonar o repositório
 ```bash
-# clonar o repositório
-git clone https://github.com/saraafariass/ic2026.git
+git clone [https://github.com/saraafariass/ic2026.git](https://github.com/saraafariass/ic2026.git)
 cd ic2026
 
-# instalar as dependências
+2. Criar e ativar o ambiente virtual (Recomendado)
+
+    Linux / macOS:
+
+Bash
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+    Windows (PowerShell):
+
+PowerShell
+
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+
+    Windows (Prompt de Comando - CMD):
+
+DOS
+
+python -m venv .venv
+.venv\Scripts\activate.bat
+
+3. Instalar as dependências
+
+Com o ambiente ativado, instale todas as bibliotecas necessárias:
+Bash
+
 pip install -r requirements.txt
 
-# rodar o dashboard
+4. Executar o Dashboard
+
+Execute a aplicação via Streamlit:
+Bash
+
 streamlit run app.py
-```
 
-O dashboard abrirá automaticamente em `http://localhost:8501`.
+O dashboard abrirá automaticamente no seu navegador padrão no endereço:
+http://localhost:8501
+Dependências Principais
 
-## Deploy
+    streamlit — Interface web interativa
 
-O dashboard está hospedado gratuitamente no [Streamlit Community Cloud](https://share.streamlit.io/), conectado diretamente a este repositório. Qualquer atualização enviada para a branch `main` é refletida automaticamente no app publicado.
+    pandas — Manipulação e tratamento das bases de dados
 
-## Fontes dos dados
+    plotly — Gráficos interativos e dinâmicos
 
-Os dados são atualizados manualmente a partir das informações disponíveis no [site oficial do projeto](https://meninasdigitaisnocerrado.com.br).
+    matplotlib — Renderização de gráficos estáticos
 
-## Como citar
+    wordcloud — Geração de nuvem de palavras
 
-```
-MENINAS DIGITAIS NO CERRADO. Sistematização de dados abertos sobre gênero
-na Computação no Campus Ceres: 10 anos de Meninas Digitais no Cerrado.
-Ceres: IF Goiano - Campus Ceres, 2026. Disponível em:
-https://meninasdigitaisnocerrado.com.br. Acesso em: dia mês ano.
-```
+    nltk — Processamento de linguagem natural (Stopwords)
 
----
+Estrutura de Pastas
+Plaintext
 
-Feito com 🤍 por Sara Farias - Meninas Digitais no Cerrado
+ic2026/
+├── assets/          # Estilos CSS
+├── data/            # 7 csvs
+├── utils/           # Módulos de carregamento, filtros e componentes visuais
+├── views/           # Módulos de cada aba do painel
+├── app.py           # Arquivo principal de execução
+├── requirements.txt # Lista de dependências Python
+└── README.md        # Documentação do projeto
+
+Equipe e contato
+
+    Bolsista PIBIC: Sara Luiz de Farias (Lattes)
+
+    Coordenadora: Profa. Thalia Santos de Santana (Lattes)
+
+    Instituição: Instituto Federal Goiano - Campus Ceres
+

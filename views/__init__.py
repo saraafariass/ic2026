@@ -1,0 +1,1 @@
+from . import estudantes, docentes, projetos, publicacoes, eventos, parcerias, sobre
