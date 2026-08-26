@@ -17,12 +17,15 @@ def render(eventos_periodo, premiacoes_periodo):
 
     if not eventos_periodo.empty:
         eventos_periodo = eventos_periodo.copy()
-        eventos_periodo["funcao"] = eventos_periodo["funcao"].replace("Promoção de eventos", "Organização")
-        eventos_periodo["funcao"] = eventos_periodo["funcao"].str.strip().str.title()
+        
+        # Garante a existência da coluna categoria mapeando a partir de funcao, se necessário
+        col_cat = "categoria" if "categoria" in eventos_periodo.columns else "funcao"
+        eventos_periodo["categoria"] = eventos_periodo[col_cat].replace("Promoção de eventos", "Organização")
+        eventos_periodo["categoria"] = eventos_periodo["categoria"].str.strip().str.title()
         eventos_periodo["link"] = eventos_periodo["link"].fillna("")
 
         eventos_agrupados = eventos_periodo.groupby(
-            ["ano", "nome", "funcao", "tipo_atividade", "local"],
+            ["ano", "nome", "categoria", "tipo_atividade", "local"],
             as_index=False
         ).agg({
             "link": lambda x: "; ".join([l for l in x if l.strip() != ""])
@@ -38,7 +41,7 @@ def render(eventos_periodo, premiacoes_periodo):
 
     st.markdown(f"""
     <div style="background:#f5f5f5;border-radius:8px;padding:1rem;margin-bottom:1.5rem;font-size:0.85rem;color:#666;line-height:1.6;">
-        <strong>Padrão adotado:</strong> As definições das funções foram estabelecidas conforme a padronização do Currículo Lattes:<br>
+        <strong>Padrão adotado:</strong> As definições das categorias foram estabelecidas conforme a padronização do Currículo Lattes:<br>
         • <strong>Organização:</strong> Atuação na organização e promoção do evento.<br>
         • <strong>Participante:</strong> Apresentação de trabalhos, publicação de artigos, palestras dadas ou condução de oficinas.<br>
         • <strong>Ouvinte:</strong> Presença no evento para assistir às apresentações e palestras.<br><br>
@@ -58,11 +61,11 @@ def render(eventos_periodo, premiacoes_periodo):
     }
 
     for cat in [
-        {"nome": "Organização", "funcao": "Organização"},
-        {"nome": "Participante", "funcao": "Participante"},
-        {"nome": "Ouvinte", "funcao": "Ouvinte"}
+        {"nome": "Organização", "categoria": "Organização"},
+        {"nome": "Participante", "categoria": "Participante"},
+        {"nome": "Ouvinte", "categoria": "Ouvinte"}
     ]:
-        eventos_cat = eventos_para_graficos[eventos_para_graficos["funcao"] == cat["funcao"]]
+        eventos_cat = eventos_para_graficos[eventos_para_graficos["categoria"] == cat["categoria"]]
         if not eventos_cat.empty:
             eventos_cat = eventos_cat.sort_values(["ano", "nome"], ascending=[False, True])
             label = f"{cat['nome']} ({len(eventos_cat)})"
@@ -101,44 +104,100 @@ def render(eventos_periodo, premiacoes_periodo):
                     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    secao("Indicadores e Gráficos de Eventos")
+    secao("Participações em eventos por categoria e ano")
 
-    if not eventos_para_graficos.empty and "funcao" in eventos_para_graficos.columns:
-        eventos_por_ano_funcao = eventos_para_graficos.groupby(["ano", "funcao"]).size().reset_index(name="quantidade")
-        fig_func = px.bar(
-            eventos_por_ano_funcao.sort_values("ano"), x="ano", y="quantidade", color="funcao", barmode="group",
+    # 1. Gráfico por Categoria
+    if not eventos_para_graficos.empty and "categoria" in eventos_para_graficos.columns:
+        eventos_por_ano_cat = eventos_para_graficos.groupby(["ano", "categoria"]).size().reset_index(name="quantidade")
+        max_y_cat = eventos_por_ano_cat["quantidade"].max()
+
+        fig_cat = px.bar(
+            eventos_por_ano_cat.sort_values("ano"), x="ano", y="quantidade", color="categoria", barmode="group",
             color_discrete_map={"Organização": "#c62828", "Ouvinte": "#e57373", "Participante": "#ef5350"},
-            text="quantidade", title="Participações em eventos por função e ano"
+            text="quantidade"
         )
-        fig_func.update_layout(height=400, paper_bgcolor=fundo, plot_bgcolor=fundo, xaxis_title="Ano", yaxis_title="Número de participações", xaxis=dict(tickmode="linear", dtick=1))
-        fig_func.update_traces(textposition="outside")
-        st.plotly_chart(fig_func, use_container_width=True)
+        fig_cat.update_layout(
+            height=400, paper_bgcolor=fundo, plot_bgcolor=fundo,
+            xaxis_title="Ano", yaxis_title="Número de participações",
+            legend=dict(title=None, orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(t=60, b=20, l=20, r=20),
+            xaxis=dict(tickmode="linear", dtick=1, showgrid=False),
+            yaxis=dict(
+                showgrid=False,
+                range=[0, max_y_cat * 1.22 if max_y_cat > 0 else 1]
+            )
+        )
+        fig_cat.update_traces(
+            textposition="outside",
+            cliponaxis=False
+        )
+        st.plotly_chart(fig_cat, use_container_width=True)
+        
+        
+    st.markdown("---")
+    secao("Eventos por tipo de atividade e ano")
 
+    # 2. Gráfico por Tipo de Atividade
     if not eventos_para_graficos.empty and "tipo_atividade" in eventos_para_graficos.columns:
         eventos_por_ano_tipo = eventos_para_graficos.groupby(["ano", "tipo_atividade"]).size().reset_index(name="quantidade")
         tipos = sorted(eventos_por_ano_tipo["tipo_atividade"].unique())
         paleta_vermelhos = colors.sequential.Reds[3:]
         cores_tipo = {t: paleta_vermelhos[i % len(paleta_vermelhos)] for i, t in enumerate(tipos)}
+        max_y_tipo = eventos_por_ano_tipo["quantidade"].max()
 
         fig_tipo = px.bar(
             eventos_por_ano_tipo.sort_values("ano"), x="ano", y="quantidade", color="tipo_atividade", barmode="group",
-            color_discrete_map=cores_tipo, text="quantidade", title="Eventos por tipo de atividade e ano"
+            color_discrete_map=cores_tipo, text="quantidade"
         )
-        fig_tipo.update_layout(height=400, paper_bgcolor=fundo, plot_bgcolor=fundo, xaxis_title="Ano", yaxis_title="Número de eventos", xaxis=dict(tickmode="linear", dtick=1))
-        fig_tipo.update_traces(textposition="outside")
+        fig_tipo.update_layout(
+            height=400, paper_bgcolor=fundo, plot_bgcolor=fundo,
+            xaxis_title="Ano", yaxis_title="Número de eventos",
+            legend=dict(title=None, orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(t=60, b=20, l=20, r=20),
+            xaxis=dict(tickmode="linear", dtick=1, showgrid=False),
+            yaxis=dict(
+                showgrid=False,
+                range=[0, max_y_tipo * 1.22 if max_y_tipo > 0 else 1]
+            )
+        )
+        fig_tipo.update_traces(
+            textposition="outside",
+            cliponaxis=False
+        )
         st.plotly_chart(fig_tipo, use_container_width=True)
 
     st.markdown("---")
-    secao("Premiações")
+    secao("Premiações conquistadas por ano")
 
+    # 3. Gráfico de Premiações
     if not premiacoes_periodo.empty:
         premiacoes_por_ano = premiacoes_periodo.groupby("ano").size().reset_index(name="quantidade")
+        premiacoes_por_ano["ano_str"] = premiacoes_por_ano["ano"].astype(str)
+        max_y_prem = premiacoes_por_ano["quantidade"].max()
+
+        # Paleta de vermelhos alinhada ao projeto
+        anos_prem = premiacoes_por_ano["ano_str"].tolist()
+        paleta_vermelhos_prem = ["#f57c5f", "#ee583f", "#e52b20", "#bf1313", "#930c10", "#4a0304"]
+        cores_prem = {ano: paleta_vermelhos_prem[i % len(paleta_vermelhos_prem)] for i, ano in enumerate(anos_prem)}
+
         fig_premiacoes = px.bar(
-            premiacoes_por_ano, x="ano", y="quantidade", color="quantidade",
-            color_continuous_scale=["#e57373", "#c62828"], text="quantidade", title="Premiações conquistadas por ano"
+            premiacoes_por_ano, x="ano", y="quantidade", color="ano_str",
+            color_discrete_map=cores_prem, text="quantidade"
         )
-        fig_premiacoes.update_layout(height=450, paper_bgcolor=fundo, plot_bgcolor=fundo, xaxis_title="Ano", yaxis_title="Número de premiações", showlegend=False, xaxis=dict(tickmode="linear", dtick=1))
-        fig_premiacoes.update_traces(textposition="outside")
+        fig_premiacoes.update_layout(
+            height=450, paper_bgcolor=fundo, plot_bgcolor=fundo,
+            xaxis_title="Ano", yaxis_title="Número de premiações", showlegend=False,
+            margin=dict(t=50, b=20, l=20, r=20),
+            xaxis=dict(tickmode="linear", dtick=1, showgrid=False),
+            yaxis=dict(
+                showgrid=False,
+                range=[0, max_y_prem * 1.2 if max_y_prem > 0 else 1]
+            )
+        )
+        fig_premiacoes.update_traces(
+            textposition="outside",
+            cliponaxis=False
+        )
         st.plotly_chart(fig_premiacoes, use_container_width=True)
 
         st.markdown("---")
@@ -150,10 +209,3 @@ def render(eventos_periodo, premiacoes_periodo):
                 <small>Ano: {premio['ano']} - {premio.get('descricao', '')}</small>
             </div>
             """, unsafe_allow_html=True)
-    else:
-        st.info("Nenhuma premiação no período.")
-
-    st.markdown(
-        '<p class="fonte-site" style="margin-top: 2rem;">Fonte: <a href="https://meninasdigitaisnocerrado.com.br/premiacoes" target="_blank">meninasdigitaisnocerrado.com.br/premiacoes</a></p>',
-        unsafe_allow_html=True,
-    )

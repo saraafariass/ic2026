@@ -1,4 +1,4 @@
-ano,nome,funcao,tipo_atividade,local,link
+ano,nome,categoria,tipo_atividade,local,link
 
 # Padrão adotado: As definições acima foram estabelecidas conforme a padronização do Currículo Lattes.
 # Organização: Atuação na organização e promoção do evento.
@@ -16,7 +16,7 @@ ano,nome,funcao,tipo_atividade,local,link
 2025,XVII Congresso Latino-Americano de Mulheres na Computação (LAWCC),Participante,Divulgação Científica,Pontificia Universidad Católica de Valparaíso (PUCV) - Chile,https://ceur-ws.org/Vol-4185/paper3.pdf
 2025,XIX Women in Information Technology (WIT),Participante,Representação e ampliação de alcance,Maceió - AL,
 2025,5ª Simpósio Brasileiro de Educação em Computação (EduComp),Participante,Capacitação Tecnológica,Juiz de Fora - MG,
-2025,International Women's Day (IWD Cerrado),Ouvinte,Viagem Técnica,Goiânia - GO,
+2025,International Women's Day (IWD Cerrado),Ouvinte,Visita Técnica,Goiânia - GO,
 2025,Capacitação "Do Circuito ao Código",Organização,Capacitação Tecnológica,IF Goiano - Campus Ceres,
 2025,Estratégia de Comunicação Científica no Instagram,Participante,Capacitação Tecnológica,Online,
 2025,IX Ada Lovelace Day,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
@@ -34,7 +34,7 @@ ano,nome,funcao,tipo_atividade,local,link
 2024,Jogando e Aprendendo: uma oficina lúdica sobre a História das Mulheres na Computação,Organização,Construção humana,IF Goiano - Campus Ceres,
 2024,Maratona SBC de Programação,Participante,Capacitação Tecnológica,Universidade Federal de Goiás (UFG),
 2024,Women in Information Technology (WIT),Participante,Divulgação Científica,Brasília -DF,https://sol.sbc.org.br/index.php/wit/article/view/29559
-2024,International Women's Day (IWD Cerrado),Ouvinte,Viagem Técnica,Goiânia - GO,
+2024,International Women's Day (IWD Cerrado),Ouvinte,Visita Técnica,Goiânia - GO,
 2024,Cine Pipoca com o filme Barbie,Organização,Construção humana,IF Goiano - Campus Ceres,
 2024,Campus Party Brasília,Participante,Construção humana,Brasília - DF,
 2024,Acolhimento de Calouras,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
@@ -100,7 +100,7 @@ ano,nome,funcao,tipo_atividade,local,link
 2020,XXI Feira de Ciência e Tecnologia,Participante,Construção humana,Online,
 2020,Live das Meninas Cientistas IFG,Participante,Construção humana,Online,
 2019,Acolhimento de Calouras,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
-2019,Women Techmakers,Participante,Viagem Técnica,Goiânia - GO,
+2019,Women Techmakers,Participante,Visita Técnica,Goiânia - GO,
 2019,I Colóquio da LAAD sobre o Dia da Mulher,Participante,Construção humana,Goiânia - GO
 2019,9º Computer on the Beach,Participante,Divulgação Científica,Itajaí - SC,https://siaiap32.univali.br/seer/index.php/acotb/article/view/14454
 2019,Criando seu Primeiro Site (III IntegraTec),Participante,Capacitação Tecnológica,IF Goiano - Campus Ceres,
@@ -131,15 +131,15 @@ ano,nome,funcao,tipo_atividade,local,link
 2018,Dia da Mulher: Palestra Humano e Humana Direitos e Histórias,Organização,Construção humana,IF Goiano - Campus Ceres,
 2018,Dia da Mulher: Confecção de Cartazes,Organização,Construção humana,IF Goiano - Campus Ceres,
 2017,II Mostra de Extensão do Campus Ceres,Participante,Divulgação Científica,IF Goiano - Campus Ceres,
-2017,XIV Fórum Goiano de Software Livre (FGSL),Ouvinte,Viagem Técnica,Universidade Federal de Goiás (UFG),
+2017,XIV Fórum Goiano de Software Livre (FGSL),Ouvinte,Visita Técnica,Universidade Federal de Goiás (UFG),
 2017,I Ada Lovelace Day,Organização,Promoção de eventos,IF Goiano - Campus Ceres,
 2017,Oficina de robótica (II Simpósio de Tecnologia da Informação - SIMTEC),Participante,Capacitação Tecnológica,IF Goiano - Campus Ceres,
 2017,Palestra - Era uma vez Lovelace: a história das mulheres na tecnologia (Dia da Informática),Participante,Construção humana,IFG - Campus Luziânia,
 2017,XI Women in Information Technology (WIT),Participante,Divulgação Científica,São Paulo - SP,https://sol.sbc.org.br/index.php/wit/article/view/3407
-2017,Oficina: História para meninas nerds: mulheres incríveis na linha do tempo da Computação (5° Encontro de Mulheres na Tecnologia),Participante,Viagem Técnica,Goiânia - GO,
+2017,Oficina: História para meninas nerds: mulheres incríveis na linha do tempo da Computação (5° Encontro de Mulheres na Tecnologia),Participante,Visita Técnica,Goiânia - GO,
 2017,Minicurso Robótica: Primeiros Passos com Arduino (II Simpósio de Tecnologia da Informação - SIMTEC),Participante,Capacitação Tecnológica,IF Goiano - Campus  Ceres,
 2017,Cine Debate: Filme Estrelas Além do Tempo,Organização,Construção humana,IF Goiano - Campus Ceres,
-2017,Palestra: Era uma vez Lovelace: a história das mulheres na tecnologia (4° Woman Techmakers),Participante,Viagem Técnica,Goiânia - GO,
+2017,Palestra: Era uma vez Lovelace: a história das mulheres na tecnologia (4° Woman Techmakers),Participante,Visita Técnica,Goiânia - GO,
 2016,I Mostra de Extensão do Campus Ceres,Participante,Divulgação Científica,IF Goiano - Campus Ceres,
 2016,Caixinha de perguntas: Você já contratou uma mulher para dar manutenção em seu computador? Justifique,Organização,Construção humana,IF Goiano - Campus Ceres,
 2016,Bate papo: hardware livre e suas possibilidades,Participante,Capacitação Tecnológica,IF Goiano - Campus Ceres,

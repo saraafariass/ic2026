@@ -108,3 +108,11 @@ def badge_curso(curso_str):
         elif any(g in curso for g in ["Graduação", "Licenciatura", "Bacharelado"]):
             badges.append('<span class="badge badge-grad">Graduação</span>')
     return " ".join(badges)
+
+
+def lista_cursos(curso_str):
+    if pd.isna(curso_str) or not str(curso_str).strip():
+        return []
+    # Divide por " e " ou por ";" garantindo que todos os cursos sejam extraídos
+    partes = str(curso_str).replace(";", " e ").split(" e ")
+    return [c.strip() for c in partes if c.strip()]

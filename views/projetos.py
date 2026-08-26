@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import nltk
 from nltk.corpus import stopwords as nltk_stopwords
+import random
 
-from assets.styles import vermelho, fundo
+from assets.styles import vermelho, fundo, cores_projetos
 from utils.components import secao
 
 @st.cache_resource
@@ -14,7 +15,7 @@ def carregar_stopwords():
     nltk.download("stopwords", quiet=True)
     sw = set(nltk_stopwords.words("portuguese"))
     sw.update([
-        "presente", "assim", "desta", "sobre", "forma", "modo", "além", "disso", "bem", "tanto",
+        "presente", "nesse", "nessa", "assim", "desta", "sobre", "forma", "modo", "além", "disso", "bem", "tanto",
         "sendo", "diante", "meio", "vista", "quais", "vistas", "sentido", "âmbito",
         "propõe", "propõem", "propor", "objetiva", "objetivo", "intuito",
         "visa", "busca", "diversas", "diversos", "cada", "todo", "toda",
@@ -22,6 +23,12 @@ def carregar_stopwords():
         "através", "conforme", "inclusive", "ainda"
     ])
     return sw
+
+def paleta_nuvem_escura(word, font_size, position, orientation, random_state=None, **kwargs):
+    tons_grafico = [
+        "#f57c5f", "#ee583f", "#e52b20", "#bf1313", "#930c10", "#4a0304"
+    ]
+    return random.choice(tons_grafico)
 
 def render(projetos_periodo):
     secao("Projetos por tipo")
@@ -38,12 +45,26 @@ def render(projetos_periodo):
 
     if not projetos_periodo.empty:
         contagem_tipos = projetos_periodo.groupby("tipo").size().reset_index(name="quantidade")
+        max_y_proj = contagem_tipos["quantidade"].max()
+
         fig = px.bar(
-            contagem_tipos, x="tipo", y="quantidade", color="quantidade",
-            color_continuous_scale=["#e57373", "#c62828"], text="quantidade"
+            contagem_tipos, x="tipo", y="quantidade", color="tipo",
+            color_discrete_map=cores_projetos, text="quantidade"
         )
-        fig.update_layout(height=400, paper_bgcolor=fundo, plot_bgcolor=fundo, xaxis_title="Tipo de projeto", yaxis_title="Quantidade", showlegend=False)
-        fig.update_traces(textposition="outside")
+        fig.update_layout(
+            height=400, paper_bgcolor=fundo, plot_bgcolor=fundo,
+            xaxis_title="Tipo de projeto", yaxis_title="Quantidade", showlegend=False,
+            margin=dict(t=50, b=20, l=20, r=20),
+            xaxis=dict(showgrid=False),
+            yaxis=dict(
+                showgrid=False,
+                range=[0, max_y_proj * 1.2 if max_y_proj > 0 else 1]
+            )
+        )
+        fig.update_traces(
+            textposition="outside",
+            cliponaxis=False
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
@@ -71,7 +92,7 @@ def render(projetos_periodo):
                     if resumo:
                         st.markdown(f"""
                         <details style="margin-top:0.5rem;">
-                            <summary style="cursor:pointer; color:{vermelho}; font-weight:600;">Ver resumo</summary>
+                            <summary style="cursor:pointer; color:{vermelho}; font-weight:600; font-size:0.85rem;">Ver resumo</summary>
                             <div style="background:#f5f5f5; padding:0.5rem 0.8rem; border-radius:6px; margin-top:0.3rem; font-size:0.85rem; line-height:1.6;">
                                 {resumo}
                             </div>
@@ -90,7 +111,8 @@ def render(projetos_periodo):
         texto_completo = " ".join(projetos_periodo["resumo"].dropna().astype(str))
         wordcloud = WordCloud(
             width=800, height=400, background_color="white",
-            stopwords=stopwords, max_words=80, colormap="Reds", collocations=False
+            stopwords=stopwords, max_words=80, color_func=paleta_nuvem_escura,
+            collocations=False
         ).generate(texto_completo)
 
         fig, ax = plt.subplots(figsize=(10, 5))
