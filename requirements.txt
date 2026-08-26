@@ -1,5 +1,6 @@
 streamlit
-pandas
+pandas==2.1.4
+pyarrow==14.0.2
 plotly
 beautifulsoup4
 wordcloud
