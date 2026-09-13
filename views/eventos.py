@@ -17,22 +17,15 @@ def render(eventos_periodo, premiacoes_periodo):
 
     if not eventos_periodo.empty:
         eventos_periodo = eventos_periodo.copy()
-        
-        # Garante a existência da coluna categoria mapeando a partir de funcao, se necessário
+    
         col_cat = "categoria" if "categoria" in eventos_periodo.columns else "funcao"
         eventos_periodo["categoria"] = eventos_periodo[col_cat].replace("Promoção de eventos", "Organização")
         eventos_periodo["categoria"] = eventos_periodo["categoria"].str.strip().str.title()
+    
+        eventos_periodo["tipo_atividade"] = eventos_periodo["tipo_atividade"].str.strip().str.capitalize()
+        eventos_periodo["local"] = eventos_periodo["local"].str.strip()
         eventos_periodo["link"] = eventos_periodo["link"].fillna("")
-
-        eventos_agrupados = eventos_periodo.groupby(
-            ["ano", "nome", "categoria", "tipo_atividade", "local"],
-            as_index=False
-        ).agg({
-            "link": lambda x: "; ".join([l for l in x if l.strip() != ""])
-        })
-        eventos_agrupados["link"] = eventos_agrupados["link"].replace("", pd.NA)
-        eventos_agrupados = eventos_agrupados.dropna(subset=["nome"])
-        eventos_para_graficos = eventos_agrupados
+        eventos_para_graficos = eventos_periodo.dropna(subset=["nome"])
     else:
         eventos_para_graficos = eventos_periodo
 
@@ -53,9 +46,9 @@ def render(eventos_periodo, premiacoes_periodo):
     """, unsafe_allow_html=True)
 
     cores_mdc_vermelho = {
-        "Capacitação Tecnológica": "#b71c1c",
+        "Capacitação tecnológica": "#b71c1c",
         "Construção humana": "#c62828",
-        "Divulgação Científica": "#d32f2f",
+        "Divulgação científica": "#d32f2f",
         "Representação e ampliação de alcance": "#e53935",
         "Promoção de eventos": "#880e4f"
     }

@@ -1,4 +1,5 @@
 import streamlit as st
+
 from datetime import datetime
 
 from utils.data_loader import carregar_dados, filtrar_periodo
